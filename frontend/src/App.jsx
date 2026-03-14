@@ -34,7 +34,7 @@ function App() {
   const [explainability, setExplainability] = useState({})
   const [manualSkills, setManualSkills] = useState('')
   const [auth, setAuth] = useState({ name: '', email: '', password: '' })
-  const [token, setToken] = useState(localStorage.getItem('career_token') || '')
+  const [token, setToken] = useState(sessionStorage.getItem('career_token') || '')
   const [profileHistory, setProfileHistory] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -55,6 +55,8 @@ function App() {
   }, [token])
 
   useEffect(() => {
+    localStorage.removeItem('career_token')
+
     const timerId = window.setTimeout(() => {
       setAuth({ name: '', email: '', password: '' })
     }, 120)
@@ -142,7 +144,7 @@ function App() {
         throw new Error('No access token returned')
       }
 
-      localStorage.setItem('career_token', accessToken)
+      sessionStorage.setItem('career_token', accessToken)
       setAuthToken(accessToken)
       setToken(accessToken)
       setActiveSection('dashboard')
@@ -164,7 +166,7 @@ function App() {
         throw new Error('No access token returned')
       }
 
-      localStorage.setItem('career_token', accessToken)
+      sessionStorage.setItem('career_token', accessToken)
       setAuthToken(accessToken)
       setToken(accessToken)
 
@@ -185,7 +187,7 @@ function App() {
   }
 
   const onLogout = () => {
-    localStorage.removeItem('career_token')
+    sessionStorage.removeItem('career_token')
     setAuthToken('')
     setToken('')
     setResumeFile(null)
