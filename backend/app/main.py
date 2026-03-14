@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -24,13 +25,13 @@ from app.schemas import (
 )
 from app.services.auth import create_access_token, hash_password, verify_password
 from app.services.learning_resources import suggest_learning_resources
-from app.services.recommender import hybrid_recommend
-from app.services.resume_parser import parse_resume
 from app.services.skill_gap import skill_gap_report
 from app.services.skill_normalizer import normalize_skills
 from app.services.xai import role_explanation
 
 app = FastAPI(title="AI Career Recommendation API", version="0.1.0")
+
+TAXONOMY_SKILLS = sorted({skill for role in CAREER_TAXONOMY.values() for skill in role["skills"]})
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,20 +60,22 @@ def health():
 
 
 @app.post("/auth/register", response_model=TokenResponse)
-def register_user(payload: UserCreate, db: Session = Depends(get_db)):
+async def register_user(payload: UserCreate, db: Session = Depends(get_db)):
     existing = crud.get_user_by_email(db, payload.email)
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    crud.create_user(db, payload.name, payload.email, hash_password(payload.password))
+    hashed_password = await run_in_threadpool(hash_password, payload.password)
+    crud.create_user(db, payload.name, payload.email, hashed_password)
     token = create_access_token({"sub": payload.email})
     return {"access_token": token}
 
 
 @app.post("/auth/login", response_model=TokenResponse)
-def login_user(payload: UserLogin, db: Session = Depends(get_db)):
+async def login_user(payload: UserLogin, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, payload.email)
-    if not user or not verify_password(payload.password, user.hashed_password):
+    is_valid = bool(user) and await run_in_threadpool(verify_password, payload.password, user.hashed_password)
+    if not is_valid:
         raise HTTPException(status_code=401, detail="Invalid email/password")
 
     token = create_access_token({"sub": user.email})
@@ -81,6 +84,8 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)):
 
 @app.post("/parse-resume", response_model=ResumeParseResponse)
 async def parse_resume_endpoint(file: UploadFile = File(...)):
+    from app.services.resume_parser import parse_resume
+
     file_name = (file.filename or "").lower()
     if not file_name.endswith((".pdf", ".docx", ".txt")):
         raise HTTPException(status_code=400, detail="Upload .pdf, .docx, or .txt resume")
@@ -88,36 +93,35 @@ async def parse_resume_endpoint(file: UploadFile = File(...)):
     content = await file.read()
     profile = parse_resume(content, filename=file_name)
 
-    taxonomy_skills = sorted({skill for role in CAREER_TAXONOMY.values() for skill in role["skills"]})
-    profile["skills"] = normalize_skills(profile["skills"], taxonomy_skills)
+    normalized = normalize_skills(profile["skills"], TAXONOMY_SKILLS)
+    if normalized:
+        profile["skills"] = normalized
+    else:
+        profile["skills"] = sorted({skill.strip().lower() for skill in profile["skills"] if skill and skill.strip()})[:30]
     return profile
 
 
 @app.post("/recommend-careers", response_model=RecommendResponse)
 def recommend_careers(payload: UserProfileIn, db: Session = Depends(get_db)):
-    taxonomy_skills = sorted({skill for role in CAREER_TAXONOMY.values() for skill in role["skills"]})
-    normalized_skills = normalize_skills(payload.skills, taxonomy_skills)
+    from app.services.recommender import hybrid_recommend
 
-    skills_for_recommendation = normalized_skills
-    allow_zero_overlap = False
-    top_n = None
+    normalized_skills = normalize_skills(payload.skills, TAXONOMY_SKILLS)
+    raw_skills = sorted({skill.strip().lower() for skill in payload.skills if skill and skill.strip()})
+    skills_for_recommendation = normalized_skills if normalized_skills else raw_skills
 
     if not skills_for_recommendation:
-        fallback_skills = sorted({skill.strip().lower() for skill in payload.skills if skill and skill.strip()})
-        if not fallback_skills:
-            raise HTTPException(
-                status_code=400,
-                detail="No usable skills found in input. Please provide at least a few skill keywords from the resume.",
-            )
-        skills_for_recommendation = fallback_skills
-        allow_zero_overlap = True
-        top_n = 5
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "No usable skills detected from the resume. "
+                "Please upload a clearer resume or add role-specific skills in the skills box."
+            ),
+        )
 
     recommendations = hybrid_recommend(
         payload.user_id,
         skills_for_recommendation,
-        top_n=top_n,
-        allow_zero_overlap=allow_zero_overlap,
+        allow_zero_overlap=not bool(normalized_skills),
     )
     if not recommendations:
         raise HTTPException(

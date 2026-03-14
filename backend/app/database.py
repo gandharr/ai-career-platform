@@ -4,11 +4,21 @@ from pymongo import MongoClient
 
 from app.config import settings
 
-engine = create_engine(settings.postgres_url, pool_pre_ping=True)
+engine = create_engine(
+    settings.postgres_url,
+    pool_pre_ping=True,
+    pool_recycle=1800,
+    pool_timeout=15,
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-mongo_client = MongoClient(settings.mongo_url)
+mongo_client = MongoClient(
+    settings.mongo_url,
+    serverSelectionTimeoutMS=2500,
+    connectTimeoutMS=2500,
+    socketTimeoutMS=4000,
+)
 mongo_db = mongo_client[settings.mongo_db_name]
 
 

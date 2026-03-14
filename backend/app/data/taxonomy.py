@@ -219,8 +219,30 @@ CAREER_TAXONOMY = {
     "Pharmacist": {
         "skills": ["pharmacology", "drug interactions", "patient counseling",
                    "medication management", "clinical pharmacy",
-                   "prescription review", "healthcare regulations", "laboratory"],
+                   "prescription review", "healthcare regulations", "laboratory",
+                   "hospital pharmacy", "community pharmacy", "dispensing", "pharmaceutical calculations"],
         "salary_range_lpa": "4-12",
+    },
+    "Pharmaceutical Quality Assurance Specialist": {
+        "skills": ["gmp", "glp", "qa", "quality assurance", "quality control",
+                   "hplc", "documentation", "validation", "batch records", "deviation handling"],
+        "salary_range_lpa": "4-14",
+    },
+    "Pharmaceutical Production Executive": {
+        "skills": ["pharmaceutical manufacturing", "gmp", "sop", "batch manufacturing",
+                   "tablet compression", "capsule filling", "granulation", "process optimization",
+                   "clean room", "line clearance"],
+        "salary_range_lpa": "4-13",
+    },
+    "Regulatory Affairs Specialist": {
+        "skills": ["regulatory compliance", "ctd", "dossier preparation", "fda guidelines",
+                   "ich guidelines", "pharmacovigilance", "drug approval", "labeling compliance"],
+        "salary_range_lpa": "5-16",
+    },
+    "Clinical Research Associate": {
+        "skills": ["clinical trials", "gcp", "informed consent", "site monitoring",
+                   "case report forms", "protocol compliance", "pharmacovigilance", "data management"],
+        "salary_range_lpa": "5-15",
     },
     "Public Health Specialist": {
         "skills": ["epidemiology", "public health policy", "data analysis",
@@ -374,5 +396,48 @@ CAREER_TAXONOMY = {
                    "lms", "content writing", "assessment design",
                    "articulate", "multimedia"],
         "salary_range_lpa": "4-12",
+    },
+
+    # ── Agriculture / Agri-Tech ───────────────────────────────────────────
+    "Agronomist": {
+        "skills": ["crop science", "soil testing", "irrigation", "fertilizer management",
+                   "pest management", "seed technology", "farm advisory", "field trials"],
+        "salary_range_lpa": "3-10",
+    },
+    "Agriculture Officer": {
+        "skills": ["agronomy", "crop planning", "soil health", "farmer training",
+                   "agriculture extension", "input management", "farm inspection", "rural development"],
+        "salary_range_lpa": "4-12",
+    },
+
+    # ── Sales / Customer Success ──────────────────────────────────────────
+    "Sales Executive": {
+        "skills": ["lead generation", "client communication", "negotiation", "crm",
+                   "sales pipeline", "product demo", "target achievement", "closing deals"],
+        "salary_range_lpa": "3-12",
+    },
+    "Customer Success Manager": {
+        "skills": ["customer onboarding", "relationship management", "churn reduction", "crm",
+                   "account management", "upselling", "support coordination", "communication"],
+        "salary_range_lpa": "5-18",
+    },
+
+    # ── Hospitality / Service ─────────────────────────────────────────────
+    "Hotel Operations Manager": {
+        "skills": ["front office", "guest relations", "housekeeping", "food and beverage",
+                   "hospitality management", "shift planning", "service quality", "team leadership"],
+        "salary_range_lpa": "4-14",
+    },
+    "Travel Consultant": {
+        "skills": ["itinerary planning", "ticketing", "customer support", "gds",
+                   "travel regulations", "visa assistance", "sales", "communication"],
+        "salary_range_lpa": "3-10",
+    },
+
+    # ── Clinical Care ──────────────────────────────────────────────────────
+    "Nurse": {
+        "skills": ["patient care", "clinical procedures", "vital signs monitoring", "medication administration",
+                   "infection control", "emergency response", "electronic health records", "clinical documentation"],
+        "salary_range_lpa": "3-10",
     },
 }

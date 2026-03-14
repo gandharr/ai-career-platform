@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import jsPDF from 'jspdf'
 import {
+  warmUpBackend,
   getLearningPath,
   getSkillGap,
   getUserProfile,
@@ -54,6 +54,24 @@ function App() {
     }
   }, [token])
 
+  const refreshProfileHistory = async () => {
+    try {
+      const profileRes = await getUserProfile()
+      setProfileHistory(profileRes.recent_recommendations || [])
+    } catch {
+      setProfileHistory([])
+    }
+  }
+
+  useEffect(() => {
+    if (!token) {
+      setProfileHistory([])
+      return
+    }
+
+    void refreshProfileHistory()
+  }, [token])
+
   useEffect(() => {
     localStorage.removeItem('career_token')
 
@@ -62,6 +80,10 @@ function App() {
     }, 120)
 
     return () => window.clearTimeout(timerId)
+  }, [])
+
+  useEffect(() => {
+    void warmUpBackend()
   }, [])
 
   const chartData = useMemo(
@@ -170,13 +192,6 @@ function App() {
       setAuthToken(accessToken)
       setToken(accessToken)
 
-      try {
-        const profileRes = await getUserProfile()
-        setProfileHistory(profileRes.recent_recommendations || [])
-      } catch {
-        setProfileHistory([])
-      }
-
       setActiveSection('dashboard')
       showMessage('Signed in successfully.')
     } catch (requestError) {
@@ -227,7 +242,8 @@ function App() {
     }
   }
 
-  const onExportPdf = () => {
+  const onExportPdf = async () => {
+    const { default: jsPDF } = await import('jspdf')
     const doc = new jsPDF()
 
     doc.setFillColor(8, 15, 30)

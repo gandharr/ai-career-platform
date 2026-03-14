@@ -1,12 +1,7 @@
-import {
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
-  Radar,
-  RadarChart,
-  ResponsiveContainer,
-} from 'recharts'
+import { Suspense, lazy } from 'react'
 import { LogoMark, Meter, ProviderBadge, SectionFrame, SkillChip, Tabs, formatPercentValue } from './ui'
+
+const GapRadarChart = lazy(() => import('./GapRadarChart'))
 
 export function HeroHeader({ isAuthenticated, onLogout }) {
   return (
@@ -416,21 +411,9 @@ export function GapSection({ isAuthenticated, activeSection, gapReport, chartDat
 
       <SectionFrame step="07" title="Skill radar" hint="A quick visual read of missing-skill importance.">
         <div className="h-80">
-          <ResponsiveContainer>
-            <RadarChart data={chartData}>
-              <PolarGrid stroke="#334155" />
-              <PolarAngleAxis dataKey="skill" tick={{ fontSize: 11, fill: '#cbd5e1' }} />
-              <PolarRadiusAxis tick={{ fontSize: 10, fill: '#64748b' }} />
-              <Radar
-                name="Importance"
-                dataKey="importance"
-                stroke="#67e8f9"
-                fill="#22d3ee"
-                fillOpacity={0.35}
-                strokeWidth={2}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
+          <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">Loading chart...</div>}>
+            <GapRadarChart chartData={chartData} />
+          </Suspense>
         </div>
       </SectionFrame>
     </div>

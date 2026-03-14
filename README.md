@@ -111,4 +111,4 @@ Required environment variables:
 
 `final = 0.55 * content + 0.30 * overlap + 0.15 * semantic`
 
-Fallback mode supports broad/non-tech resumes by still returning likely roles when strict normalized overlap is low.
+Recommendations are returned only when domain-aligned skill overlap is meaningful, to avoid false-positive role suggestions.

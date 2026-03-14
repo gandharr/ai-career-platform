@@ -28,7 +28,47 @@ const resolvedApiBaseUrl = resolveApiBaseUrl()
 
 const api = axios.create({
   baseURL: resolvedApiBaseUrl,
+  timeout: 12000,
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.code === 'ECONNABORTED') {
+      error.message = 'Request timed out. Please check your connection and try again.'
+    }
+    return Promise.reject(error)
+  },
+)
+
+const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms))
+
+const isTransientNetworkError = (error) => {
+  if (!error?.response) {
+    return true
+  }
+
+  const status = error.response.status
+  return [408, 429, 500, 502, 503, 504].includes(status)
+}
+
+const requestWithRetry = async (requestFn, retries = 1) => {
+  let lastError
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await requestFn()
+    } catch (error) {
+      lastError = error
+      if (attempt === retries || !isTransientNetworkError(error)) {
+        break
+      }
+      await sleep(350 * (attempt + 1))
+    }
+  }
+
+  throw lastError
+}
 
 export const setAuthToken = (token) => {
   if (token) {
@@ -44,7 +84,7 @@ export const registerUser = async (payload) => {
 }
 
 export const loginUser = async (payload) => {
-  const { data } = await api.post('/auth/login', payload)
+  const { data } = await requestWithRetry(() => api.post('/auth/login', payload), 1)
   return data
 }
 
@@ -71,6 +111,13 @@ export const getLearningPath = async (payload) => {
 }
 
 export const getUserProfile = async () => {
-  const { data } = await api.get('/user/profile')
+  const { data } = await requestWithRetry(() => api.get('/user/profile'), 1)
   return data
+}
+
+export const warmUpBackend = async () => {
+  try {
+    await api.get('/health', { timeout: 5000 })
+  } catch {
+  }
 }
