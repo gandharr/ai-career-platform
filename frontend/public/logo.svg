@@ -1,0 +1,20 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="72" fill="#08111E"/>
+  <rect x="42" y="58" width="172" height="156" rx="42" fill="url(#paint0_linear)"/>
+  <path d="M88 76C88 58.3269 102.327 44 120 44H136C153.673 44 168 58.3269 168 76V88H152V78C152 68.0589 143.941 60 134 60H122C112.059 60 104 68.0589 104 78V88H88V76Z" fill="#DDFBFF" fill-opacity="0.9"/>
+  <rect x="58" y="96" width="140" height="96" rx="28" fill="#F8FEFF" fill-opacity="0.96"/>
+  <circle cx="104" cy="135" r="8" fill="#0F172A"/>
+  <circle cx="152" cy="135" r="8" fill="#0F172A"/>
+  <circle cx="90" cy="152" r="6" fill="#FDB7C8"/>
+  <circle cx="166" cy="152" r="6" fill="#FDB7C8"/>
+  <path d="M108 162C112.5 170 119.667 174 128 174C136.333 174 143.5 170 148 162" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M179 70L184.303 82.6967L197 88L184.303 93.3033L179 106L173.697 93.3033L161 88L173.697 82.6967L179 70Z" fill="#FFD166"/>
+  <circle cx="188" cy="132" r="10" fill="#9BE7FF" fill-opacity="0.55"/>
+  <circle cx="70" cy="98" r="8" fill="#9BE7FF" fill-opacity="0.3"/>
+  <defs>
+    <linearGradient id="paint0_linear" x1="42" y1="58" x2="214" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+  </defs>
+</svg>

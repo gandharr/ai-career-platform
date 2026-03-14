@@ -1,0 +1,39 @@
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import declarative_base, sessionmaker
+from pymongo import MongoClient
+
+from app.config import settings
+
+engine = create_engine(settings.postgres_url, pool_pre_ping=True)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+mongo_client = MongoClient(settings.mongo_url)
+mongo_db = mongo_client[settings.mongo_db_name]
+
+
+def check_mongo_health() -> bool:
+    try:
+        mongo_client.admin.command("ping")
+        return True
+    except Exception:
+        return False
+
+
+def check_postgres_health() -> bool:
+    db = SessionLocal()
+    try:
+        db.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        return False
+    finally:
+        db.close()
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
