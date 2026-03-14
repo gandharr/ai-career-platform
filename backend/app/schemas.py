@@ -16,6 +16,8 @@ class UserProfileIn(BaseModel):
     name: Optional[str] = None
     skills: List[str]
     experience_years: int = 0
+    certifications: List[str] = Field(default_factory=list)
+    resume_text: str = ""
 
 
 class CareerRecommendation(BaseModel):

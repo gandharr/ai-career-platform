@@ -119,6 +119,8 @@ function App() {
         name: parsed.name,
         skills: parsed.skills,
         experience_years: 0,
+        certifications: parsed.certifications || [],
+        resume_text: parsed.raw_text || '',
       })
 
       setRecommendations(rec.recommendations)

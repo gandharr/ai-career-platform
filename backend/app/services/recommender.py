@@ -7,8 +7,109 @@ from sklearn.metrics.pairwise import cosine_similarity
 from app.data.taxonomy import CAREER_TAXONOMY
 
 
+TECH_ROLE_SUBDOMAIN = {
+    "Data Scientist": "data",
+    "Data Analyst": "data",
+    "ML Engineer": "ml",
+    "NLP Engineer": "ml",
+    "Backend Developer": "backend",
+    "Frontend Developer": "frontend",
+    "Full Stack Developer": "fullstack",
+    "DevOps Engineer": "devops",
+    "Cloud Architect": "cloud",
+    "Cybersecurity Analyst": "security",
+    "Database Administrator": "database",
+    "Mobile Developer": "mobile",
+    "Embedded Systems Engineer": "embedded",
+    "Game Developer": "game",
+}
+
+TECH_SUBDOMAIN_KEYWORDS = {
+    "data": ["sql", "python", "statistics", "tableau", "power bi", "analytics", "data visualization"],
+    "ml": ["machine learning", "deep learning", "nlp", "tensorflow", "pytorch", "model deployment"],
+    "backend": ["api", "fastapi", "django", "flask", "node.js", "microservices", "rest api"],
+    "frontend": ["javascript", "typescript", "react", "html", "css", "ui design", "responsive design"],
+    "fullstack": ["react", "node.js", "api", "sql", "docker", "javascript", "python"],
+    "devops": ["docker", "kubernetes", "ci/cd", "terraform", "linux", "automation"],
+    "cloud": ["aws", "azure", "gcp", "cloud computing", "kubernetes", "networking"],
+    "security": ["network security", "ethical hacking", "penetration testing", "siem", "firewalls"],
+    "database": ["sql", "mysql", "postgresql", "oracle", "database design", "nosql"],
+    "mobile": ["android", "ios", "flutter", "react native", "kotlin", "swift"],
+    "embedded": ["c", "c++", "microcontrollers", "embedded c", "rtos", "iot"],
+    "game": ["unity", "unreal engine", "game design", "3d modeling", "c#"],
+}
+
+TECH_CERT_KEYWORDS = {
+    "data": ["google data analytics", "power bi", "tableau", "ibm data science"],
+    "ml": ["tensorflow", "machine learning specialization", "deep learning"],
+    "backend": ["oracle java", "spring", "backend"],
+    "frontend": ["react", "frontend", "ui ux"],
+    "fullstack": ["full stack", "mern", "mean"],
+    "devops": ["docker", "kubernetes", "devops", "jenkins"],
+    "cloud": ["aws", "azure", "gcp", "cloud"],
+    "security": ["ceh", "security+", "cissp", "cyber security"],
+    "database": ["oracle", "postgres", "sql"],
+    "mobile": ["android", "ios", "flutter"],
+    "embedded": ["embedded", "iot", "arduino"],
+    "game": ["unity", "unreal"],
+}
+
+TOOL_KEYWORDS = {
+    "python",
+    "java",
+    "javascript",
+    "typescript",
+    "sql",
+    "react",
+    "node.js",
+    "fastapi",
+    "django",
+    "flask",
+    "docker",
+    "kubernetes",
+    "aws",
+    "azure",
+    "gcp",
+    "tensorflow",
+    "pytorch",
+    "tableau",
+    "power bi",
+    "git",
+    "linux",
+    "terraform",
+    "mysql",
+    "postgresql",
+    "mongodb",
+    "redis",
+    "c",
+    "c++",
+    "kotlin",
+    "swift",
+}
+
+EXPERIENCE_ACTION_KEYWORDS = {
+    "built",
+    "developed",
+    "designed",
+    "deployed",
+    "implemented",
+    "optimized",
+    "integrated",
+    "production",
+    "architecture",
+    "scalable",
+    "pipeline",
+    "microservices",
+    "automation",
+}
+
+
 def _normalize_user_skills(user_skills: List[str]) -> List[str]:
     return sorted({skill.strip().lower() for skill in user_skills if skill and skill.strip()})
+
+
+def _normalized_ratio(score: int | float) -> float:
+    return max(0.0, min(1.0, float(score) / 100.0))
 
 
 def _content_scores(user_skills: List[str]) -> Dict[str, float]:
@@ -43,6 +144,86 @@ def _matched_required_skills(user_skills: List[str], required_skills: List[str],
     return sorted(set(matched))
 
 
+def _best_match_ratio(term: str, values: List[str]) -> float:
+    if not values:
+        return 0.0
+    if term in values:
+        return 1.0
+    match = process.extractOne(term, values, scorer=fuzz.token_set_ratio)
+    if not match:
+        return 0.0
+    return _normalized_ratio(match[1])
+
+
+def _is_tech_profile(user_skills: List[str], resume_text: str = "", certifications: Optional[List[str]] = None) -> bool:
+    corpus = user_skills + [resume_text.lower()]
+    if certifications:
+        corpus.extend([item.lower() for item in certifications if item])
+    joined = " ".join(corpus)
+    keyword_hits = 0
+    for keywords in TECH_SUBDOMAIN_KEYWORDS.values():
+        keyword_hits += sum(1 for keyword in keywords if keyword in joined)
+    return keyword_hits >= 3
+
+
+def _subdomain_scores(user_skills: List[str]) -> Dict[str, float]:
+    scores: Dict[str, float] = {}
+    for subdomain, keywords in TECH_SUBDOMAIN_KEYWORDS.items():
+        if not keywords:
+            scores[subdomain] = 0.0
+            continue
+        total = sum(_best_match_ratio(keyword, user_skills) for keyword in keywords)
+        scores[subdomain] = total / len(keywords)
+    return scores
+
+
+def _core_stack_signal(user_skills: List[str], role: str) -> tuple[float, List[str]]:
+    required = [skill.lower() for skill in CAREER_TAXONOMY.get(role, {}).get("skills", [])]
+    core = required[: min(5, len(required))]
+    if not core:
+        return 0.0, []
+
+    matched = _matched_required_skills(user_skills, core, threshold=84)
+    return len(matched) / len(core), matched
+
+
+def _tool_project_signal(user_skills: List[str], role: str) -> float:
+    required = [skill.lower() for skill in CAREER_TAXONOMY.get(role, {}).get("skills", [])]
+    tool_terms = [skill for skill in required if any(token in skill for token in TOOL_KEYWORDS) or skill in TOOL_KEYWORDS]
+    if not tool_terms:
+        tool_terms = required
+    if not tool_terms:
+        return 0.0
+    matched = _matched_required_skills(user_skills, tool_terms, threshold=82)
+    return len(matched) / len(tool_terms)
+
+
+def _experience_signal(experience_years: int, resume_text: str) -> float:
+    years_score = min(1.0, max(0.0, float(experience_years)) / 6.0)
+    text = (resume_text or "").lower()
+    keyword_hits = sum(1 for token in EXPERIENCE_ACTION_KEYWORDS if token in text)
+    keyword_score = min(1.0, keyword_hits / 6.0)
+    return (0.6 * years_score) + (0.4 * keyword_score)
+
+
+def _certification_signal(role: str, certifications: Optional[List[str]]) -> float:
+    cert_lines = [item.lower() for item in (certifications or []) if item and item.strip()]
+    if not cert_lines:
+        return 0.0
+
+    subdomain = TECH_ROLE_SUBDOMAIN.get(role)
+    if not subdomain:
+        return 0.0
+
+    keywords = TECH_CERT_KEYWORDS.get(subdomain, [])
+    if not keywords:
+        return 0.0
+
+    joined = " ".join(cert_lines)
+    matched = sum(1 for keyword in keywords if keyword in joined)
+    return min(1.0, matched / max(1, len(keywords)))
+
+
 def _collab_stub_scores(user_skills: List[str]) -> Dict[str, float]:
     priors = {}
     for role, details in CAREER_TAXONOMY.items():
@@ -60,7 +241,7 @@ def _bert_stub_scores(user_skills: List[str]) -> Dict[str, float]:
     user_set = set(user_skills)
     boosted = {}
     for role, details in CAREER_TAXONOMY.items():
-        required = [s.lower() for s in details["skills"]]
+        required = [skill.lower() for skill in details["skills"]]
         matched = _matched_required_skills(user_skills, required)
         required_set = set(required)
         overlap = len(set(matched))
@@ -72,15 +253,20 @@ def _bert_stub_scores(user_skills: List[str]) -> Dict[str, float]:
 def _build_reason(user_skills: List[str], role: str) -> str:
     required = [skill.lower() for skill in CAREER_TAXONOMY.get(role, {}).get("skills", [])]
     user_set = set(user_skills)
+    core = required[: min(5, len(required))]
     matched = _matched_required_skills(user_skills, required)
+    matched_core = _matched_required_skills(user_skills, core)
     missing = [skill for skill in required if skill not in user_set]
+    missing_core = [skill for skill in core if skill not in {s.lower() for s in matched_core}]
 
     if matched:
         matched_preview = ", ".join(matched[:3])
         reason = f"Matched {len(matched)}/{len(required)} required skills"
         if matched_preview:
             reason += f": {matched_preview}"
-        if missing:
+        if missing_core:
+            reason += f". Must-have missing: {', '.join(missing_core[:2])}"
+        elif missing:
             reason += f". Missing: {', '.join(missing[:2])}"
         return reason
 
@@ -90,6 +276,9 @@ def _build_reason(user_skills: List[str], role: str) -> str:
 def hybrid_recommend(
     user_id: str,
     user_skills: List[str],
+    experience_years: int = 0,
+    certifications: Optional[List[str]] = None,
+    resume_text: str = "",
     top_n: Optional[int] = None,
     allow_zero_overlap: bool = False,
 ):
@@ -104,6 +293,16 @@ def hybrid_recommend(
     collab = _collab_stub_scores(normalized_skills)
     bert = _bert_stub_scores(normalized_skills)
 
+    tech_mode = _is_tech_profile(normalized_skills, resume_text=resume_text, certifications=certifications)
+    subdomain_score_map = _subdomain_scores(normalized_skills) if tech_mode else {}
+
+    dominant_subdomains: List[str] = []
+    if subdomain_score_map:
+        ranked_subdomains = sorted(subdomain_score_map.items(), key=lambda item: item[1], reverse=True)
+        for name, value in ranked_subdomains[:2]:
+            if value >= 0.18:
+                dominant_subdomains.append(name)
+
     w1, w2, w3 = 0.50, 0.35, 0.15
 
     scored = []
@@ -112,10 +311,31 @@ def hybrid_recommend(
         matched_count = len(user_skill_set & required_skills)
         direct_overlap = collab.get(role, 0.0)
         semantic_score = content.get(role, 0.0)
-        if not allow_zero_overlap and matched_count == 0 and direct_overlap < 0.18 and semantic_score < 0.15:
+
+        core_signal, _ = _core_stack_signal(normalized_skills, role)
+        tool_signal = _tool_project_signal(normalized_skills, role)
+        exp_signal = _experience_signal(experience_years, resume_text)
+        cert_signal = _certification_signal(role, certifications)
+
+        if not allow_zero_overlap and matched_count == 0 and (direct_overlap < 0.22 or semantic_score < 0.20):
+            continue
+
+        if tech_mode and role in TECH_ROLE_SUBDOMAIN and core_signal < 0.12 and tool_signal < 0.10 and semantic_score < 0.18:
             continue
 
         score = (w1 * semantic_score) + (w2 * direct_overlap) + (w3 * bert.get(role, 0.0))
+
+        if tech_mode and role in TECH_ROLE_SUBDOMAIN:
+            tech_score = (0.40 * core_signal) + (0.30 * tool_signal) + (0.20 * exp_signal) + (0.10 * cert_signal)
+            score = (0.55 * score) + (0.45 * tech_score)
+
+            role_subdomain = TECH_ROLE_SUBDOMAIN.get(role)
+            if dominant_subdomains:
+                if role_subdomain == dominant_subdomains[0]:
+                    score += 0.08
+                elif len(dominant_subdomains) > 1 and role_subdomain == dominant_subdomains[1]:
+                    score += 0.04
+
         reason = _build_reason(normalized_skills, role)
 
         scored.append(
@@ -127,6 +347,10 @@ def hybrid_recommend(
                     "content": round(content.get(role, 0.0), 3),
                     "collaborative": round(direct_overlap, 3),
                     "bert": round(bert.get(role, 0.0), 3),
+                    "core_stack": round(core_signal, 3),
+                    "tool_project": round(tool_signal, 3),
+                    "experience": round(exp_signal, 3),
+                    "certification": round(cert_signal, 3),
                 },
             }
         )
@@ -140,5 +364,5 @@ def hybrid_recommend(
         return []
 
     if top_n is None:
-        top_n = 5
+        top_n = 10 if tech_mode else 5
     return scored[:top_n]

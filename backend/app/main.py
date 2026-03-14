@@ -107,7 +107,7 @@ def recommend_careers(payload: UserProfileIn, db: Session = Depends(get_db)):
 
     normalized_skills = normalize_skills(payload.skills, TAXONOMY_SKILLS)
     raw_skills = sorted({skill.strip().lower() for skill in payload.skills if skill and skill.strip()})
-    skills_for_recommendation = normalized_skills if normalized_skills else raw_skills
+    skills_for_recommendation = sorted(set(normalized_skills + raw_skills))
 
     if not skills_for_recommendation:
         raise HTTPException(
@@ -121,6 +121,9 @@ def recommend_careers(payload: UserProfileIn, db: Session = Depends(get_db)):
     recommendations = hybrid_recommend(
         payload.user_id,
         skills_for_recommendation,
+        experience_years=payload.experience_years,
+        certifications=payload.certifications,
+        resume_text=payload.resume_text,
         allow_zero_overlap=not bool(normalized_skills),
     )
     if not recommendations:
