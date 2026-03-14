@@ -53,8 +53,8 @@ export function HeroHeader({ isAuthenticated, onLogout, theme, onToggleTheme }) 
         <div className="grid items-stretch gap-4 sm:grid-cols-3 lg:grid-cols-1">
           <div className="metric-card">
             <p className="metric-label">Top role slots</p>
-            <p className="metric-value">5</p>
-            <p className="metric-note">Balanced ranking from hybrid recommendation methods.</p>
+            <p className="metric-value">Up to 10</p>
+            <p className="metric-note">Tech profiles can receive up to 10 ranked matches; others stay focused.</p>
           </div>
           <div className="metric-card">
             <p className="metric-label">Learning support</p>
