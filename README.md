@@ -1,37 +1,48 @@
 # AI Career Recommendation Platform
 
-Internship-ready end-to-end implementation with short, explainable code.
+Production-ready AI career guidance platform that parses resumes, recommends role matches, explains ranking logic, and generates targeted upskilling paths.
 
-## Implemented Features
+## Live Links
+- Frontend: https://gandharr.github.io/ai-career-platform/
+- Backend API: https://ai-career-platform-api.onrender.com
+- API Docs (Swagger): https://ai-career-platform-api.onrender.com/docs
+
+## Screenshots
+
+### Dashboard (GitHub Pages)
+![CareerAI Dashboard](docs/screenshots/dashboard-home.png)
+
+### Backend API Docs (Render)
+![CareerAI API Docs](docs/screenshots/api-docs.png)
+
+## Core Features
 - Resume parsing for `.pdf`, `.docx`, `.txt`
-- Taxonomy-wide skill extraction + normalization (tech + non-tech domains)
-- Hybrid recommendation engine (content + overlap + semantic score)
-- Explainability output (matched/missing skills + method-level scores)
-- Skill-gap analyzer + learning resource recommendations
-- JWT auth (register/login) + protected profile API
-- Account-only dashboard access with sign-out state reset
-- PostgreSQL persistence for users/recommendation logs
-- MongoDB storage for recommendation history events
-- React dashboard with upload/manual skills, charts, and PDF export
-- Docker Compose with backend, frontend, PostgreSQL, MongoDB
-- GitHub Actions CI workflow
+- Taxonomy-wide skill extraction and normalization (tech + non-tech)
+- Hybrid recommendation engine (content + overlap + semantic)
+- Explainability per role (matched/missing skills + method scores)
+- Skill-gap analysis with learning resource suggestions
+- JWT authentication (register/login) with protected user profile routes
+- Account-gated dashboard experience
+- PDF export of recommendation results
 
 ## Tech Stack
-- Frontend: React + Tailwind + Recharts + jsPDF
-- Backend: FastAPI + scikit-learn + RapidFuzz + SQLAlchemy
-- Databases: PostgreSQL + MongoDB
-- Auth: JWT (OAuth2 bearer token flow)
-- Deployment: Docker + docker-compose
+- Frontend: React, Tailwind CSS, Recharts, jsPDF
+- Backend: FastAPI, scikit-learn, RapidFuzz, SQLAlchemy
+- Databases:
+  - PostgreSQL (Neon): users + recommendation logs
+  - MongoDB (Atlas): recommendation history events
+- Auth: JWT bearer token flow
+- CI/CD: GitHub Actions (CI + GitHub Pages deploy)
+- Local runtime: Docker Compose
 
-## Project Structure
-- `backend/app/main.py` - API routes and orchestration
-- `backend/app/services/` - parser, recommender, skill-gap, learning resources, XAI
-- `backend/app/data/taxonomy.py` - cross-domain role taxonomy and required skills
-- `backend/app/models.py` - SQLAlchemy models
-- `frontend/src/App.jsx` - dashboard workflow UI
-- `scripts/` - PowerShell helper scripts for demo and cleanup
+## Architecture
+- `frontend/`: Dashboard UI, auth flow, charts, PDF export
+- `backend/app/main.py`: API routes + orchestration layer
+- `backend/app/services/`: resume parser, recommender, skill gap, XAI, resources
+- `backend/app/models.py`: SQLAlchemy models (`users`, `recommendation_logs`)
+- `backend/app/data/taxonomy.py`: career-role skill taxonomy
 
-## Run with Docker (Recommended)
+## Run Locally with Docker (Recommended)
 ```bash
 cd ai-career-platform
 docker compose up --build
@@ -40,7 +51,8 @@ docker compose up --build
 - Frontend: http://localhost:5173
 - Backend Docs: http://localhost:8000/docs
 
-## Local Development
+## Run Locally without Docker
+
 ### Backend
 ```bash
 cd backend
@@ -55,49 +67,26 @@ npm install
 npm run dev
 ```
 
-## Demo Helper Scripts
-Use these before presentation to ensure demo data and APIs are ready.
+## Demo Scripts (Windows PowerShell)
 
-### One-click demo run (Windows PowerShell)
-From project root:
+### One-click demo
 ```powershell
 ./scripts/demo.ps1
 ```
 
-This command will:
-1. Build/start all containers
-2. Wait for backend health check
-3. Seed demo data
-4. Run smoke tests
-5. Open frontend and API docs in browser
+This command:
+1. Builds and starts containers
+2. Waits for health checks
+3. Seeds demo data
+4. Runs smoke tests
+5. Opens frontend and API docs
 
-### One-click cleanup/reset
+### Cleanup/reset
 ```powershell
 ./scripts/cleanup.ps1
 ```
 
-Use this after your demo to stop everything and reset DB volumes for a fresh run.
-
-### Seed demo data
-```bash
-cd backend
-python scripts/seed_data.py
-```
-
-### Run smoke test
-Make sure backend is running, then:
-```bash
-cd backend
-python scripts/smoke_test.py
-```
-
-Optional custom API URL:
-```bash
-set API_BASE_URL=http://localhost:8000
-python scripts/smoke_test.py
-```
-
-## Main API Endpoints
+## API Endpoints
 - `POST /auth/register`
 - `POST /auth/login`
 - `POST /parse-resume`
@@ -106,17 +95,20 @@ python scripts/smoke_test.py
 - `POST /learning-path`
 - `GET /user/profile` (requires bearer token)
 
-## Deployment Notes
-- GitHub Pages can host only the static frontend; it cannot run FastAPI, PostgreSQL, or MongoDB.
-- Recommended production split:
-	- Frontend: GitHub Pages / Vercel / Netlify
-	- Backend: Render / Railway / Fly.io / VM
-	- Databases: managed PostgreSQL + MongoDB Atlas (or hosted equivalents)
-- Set frontend API base URL via `VITE_API_URL` to the deployed backend.
-- Ensure backend CORS allows your deployed frontend origin.
+## Deployment Model
 
-## Notes for Presentation
-- Keep explanation of hybrid score simple:
-	`final = 0.55*content + 0.30*overlap + 0.15*semantic`
-- If no exact normalized overlap is found, fallback mode can still return top likely roles from user-provided keywords.
-- Explainability is shown directly per role in the dashboard.
+GitHub Pages hosts only static frontend assets. Full production uses:
+- Frontend: GitHub Pages
+- Backend: Render
+- PostgreSQL: Neon
+- MongoDB: Atlas
+
+Required environment variables:
+- Backend: `POSTGRES_URL`, `MONGO_URL`, `MONGO_DB_NAME`, `SECRET_KEY`, `CORS_ORIGINS`
+- Frontend: `VITE_API_URL`
+
+## Recommendation Formula (Presentation-friendly)
+
+`final = 0.55 * content + 0.30 * overlap + 0.15 * semantic`
+
+Fallback mode supports broad/non-tech resumes by still returning likely roles when strict normalized overlap is low.
