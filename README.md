@@ -36,9 +36,7 @@ Production-ready AI career guidance platform that parses resumes, recommends rol
 - Local runtime: Docker Compose
 
 ## Architecture
-- `frontend/src/App.jsx`: slim page orchestrator and layout composition
-- `frontend/src/hooks/useCareerWorkflow.js`: central state + business logic handlers
-- `frontend/src/components/sections/`: split section UI modules (layout, input, results)
+- `frontend/`: Dashboard UI, auth flow, charts, PDF export
 - `backend/app/main.py`: API routes + orchestration layer
 - `backend/app/services/`: resume parser, recommender, skill gap, XAI, resources
 - `backend/app/models.py`: SQLAlchemy models (`users`, `recommendation_logs`)
