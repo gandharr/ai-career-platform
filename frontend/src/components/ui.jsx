@@ -8,7 +8,7 @@ export function formatPercentValue(value) {
 }
 
 export function LogoMark({ className = 'h-12 w-12' }) {
-  return <img src="/logo.svg" alt="CareerAI logo" className={className} />
+  return <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="CareerAI logo" className={className} />
 }
 
 export function Tabs({ items, active, onChange }) {
