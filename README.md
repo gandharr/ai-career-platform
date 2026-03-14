@@ -3,9 +3,9 @@
 Production-ready AI career guidance platform that parses resumes, recommends role matches, explains ranking logic, and generates targeted upskilling paths.
 
 ## Live Links
-- Frontend: https://gandharr.github.io/ai-career-platform/
-- Backend API: https://ai-career-platform-api.onrender.com
-- API Docs (Swagger): https://ai-career-platform-api.onrender.com/docs
+- Frontend: [https://gandharr.github.io/ai-career-platform/](https://gandharr.github.io/ai-career-platform/)
+- Backend Health: [https://ai-career-platform-api.onrender.com/health](https://ai-career-platform-api.onrender.com/health)
+- API Docs (Swagger): [https://ai-career-platform-api.onrender.com/docs](https://ai-career-platform-api.onrender.com/docs)
 
 ## Screenshots
 
