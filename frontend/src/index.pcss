@@ -9,6 +9,10 @@
     color-scheme: dark;
   }
 
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
   html {
     font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
     scroll-behavior: smooth;
@@ -28,6 +32,14 @@
     min-height: 100vh;
   }
 
+  body.theme-light {
+    color: #0f172a;
+    background:
+      radial-gradient(circle at top left, rgba(6, 182, 212, 0.16), transparent 28%),
+      radial-gradient(circle at top right, rgba(217, 70, 239, 0.12), transparent 24%),
+      linear-gradient(180deg, #eef2ff 0%, #f8fafc 45%, #f1f5f9 100%);
+  }
+
   #root {
     min-height: 100vh;
   }
@@ -40,6 +52,72 @@
     background: rgba(34, 211, 238, 0.32);
     color: #f8fafc;
   }
+
+  body.theme-light ::selection {
+    background: rgba(14, 165, 233, 0.25);
+    color: #0f172a;
+  }
+}
+
+body.theme-light .panel {
+  @apply border-slate-200 bg-white/90 shadow-slate-200/70;
+}
+
+body.theme-light .btn-ghost {
+  @apply border-slate-300 bg-white text-slate-700 hover:bg-slate-100;
+}
+
+body.theme-light .field-input {
+  @apply border-slate-300 bg-white text-slate-800 placeholder:text-slate-400;
+}
+
+body.theme-light .upload-area {
+  @apply border-slate-300 bg-slate-50 hover:border-cyan-300 hover:bg-cyan-50/50;
+}
+
+body.theme-light .status-idle {
+  @apply border-slate-300 bg-slate-100 text-slate-700;
+}
+
+body.theme-light .mini-stat,
+body.theme-light .metric-card,
+body.theme-light .tag-pill {
+  @apply border-slate-200 bg-white text-slate-700;
+}
+
+body.theme-light .notice.success {
+  @apply border-emerald-300 bg-emerald-50 text-emerald-700;
+}
+
+body.theme-light .notice.error {
+  @apply border-rose-300 bg-rose-50 text-rose-700;
+}
+
+body.theme-light .text-slate-50,
+body.theme-light .text-slate-100,
+body.theme-light .text-slate-200,
+body.theme-light .text-slate-300,
+body.theme-light .text-slate-400,
+body.theme-light .text-slate-500 {
+  color: #1e293b !important;
+}
+
+body.theme-light .bg-slate-950\/60,
+body.theme-light .bg-slate-950\/50,
+body.theme-light .bg-slate-900\/70,
+body.theme-light .bg-slate-900\/75,
+body.theme-light .bg-slate-900\/60,
+body.theme-light .bg-slate-950\/80,
+body.theme-light .bg-slate-900\/80,
+body.theme-light .bg-slate-950,
+body.theme-light .bg-slate-900,
+body.theme-light .bg-slate-800 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.theme-light .border-white\/10,
+body.theme-light .border-white\/20 {
+  border-color: rgba(148, 163, 184, 0.4) !important;
 }
 
 @layer components {

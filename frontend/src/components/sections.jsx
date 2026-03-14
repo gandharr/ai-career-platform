@@ -3,7 +3,7 @@ import { LogoMark, Meter, ProviderBadge, SectionFrame, SkillChip, Tabs, formatPe
 
 const GapRadarChart = lazy(() => import('./GapRadarChart'))
 
-export function HeroHeader({ isAuthenticated, onLogout }) {
+export function HeroHeader({ isAuthenticated, onLogout, theme, onToggleTheme }) {
   return (
     <header className="panel overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.14),transparent_28%),radial-gradient(circle_at_top_right,rgba(244,114,182,0.12),transparent_24%)]" />
@@ -17,6 +17,9 @@ export function HeroHeader({ isAuthenticated, onLogout }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button type="button" onClick={onToggleTheme} className="btn btn-ghost" aria-label="Toggle theme">
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </button>
             <span className={`status-pill ${isAuthenticated ? 'status-live' : 'status-idle'}`}>
               <span className={`h-2.5 w-2.5 rounded-full ${isAuthenticated ? 'bg-emerald-400' : 'bg-slate-500'}`} />
               {isAuthenticated ? 'Signed in' : 'Login required'}

@@ -42,7 +42,15 @@ function App() {
   const [authTab, setAuthTab] = useState('login')
   const [inputTab, setInputTab] = useState('manual')
   const [activeSection, setActiveSection] = useState('dashboard')
+  const [theme, setTheme] = useState(localStorage.getItem('career_theme') || 'dark')
   const flashTimeoutRef = useRef(0)
+
+  useEffect(() => {
+    const nextTheme = theme === 'light' ? 'light' : 'dark'
+    document.documentElement.setAttribute('data-theme', nextTheme)
+    document.body.classList.toggle('theme-light', nextTheme === 'light')
+    localStorage.setItem('career_theme', nextTheme)
+  }, [theme])
 
   useEffect(() => {
     setAuthToken(token || '')
@@ -220,6 +228,10 @@ function App() {
     showMessage('Signed out.')
   }
 
+  const onToggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+  }
+
   const onAnalyzeGap = async () => {
     if (!profile || !selectedRole) return
 
@@ -332,7 +344,7 @@ function App() {
   return (
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
-        <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} />
+        <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} theme={theme} onToggleTheme={onToggleTheme} />
 
         <main className="mt-8 space-y-6">
           {successMsg ? <div className="notice success">{successMsg}</div> : null}
