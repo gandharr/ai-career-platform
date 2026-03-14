@@ -1,20 +1,30 @@
 <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="256" height="256" rx="72" fill="#08111E"/>
-  <rect x="42" y="58" width="172" height="156" rx="42" fill="url(#paint0_linear)"/>
-  <path d="M88 76C88 58.3269 102.327 44 120 44H136C153.673 44 168 58.3269 168 76V88H152V78C152 68.0589 143.941 60 134 60H122C112.059 60 104 68.0589 104 78V88H88V76Z" fill="#DDFBFF" fill-opacity="0.9"/>
-  <rect x="58" y="96" width="140" height="96" rx="28" fill="#F8FEFF" fill-opacity="0.96"/>
-  <circle cx="104" cy="135" r="8" fill="#0F172A"/>
-  <circle cx="152" cy="135" r="8" fill="#0F172A"/>
-  <circle cx="90" cy="152" r="6" fill="#FDB7C8"/>
-  <circle cx="166" cy="152" r="6" fill="#FDB7C8"/>
-  <path d="M108 162C112.5 170 119.667 174 128 174C136.333 174 143.5 170 148 162" stroke="#0F172A" stroke-width="8" stroke-linecap="round"/>
-  <path d="M179 70L184.303 82.6967L197 88L184.303 93.3033L179 106L173.697 93.3033L161 88L173.697 82.6967L179 70Z" fill="#FFD166"/>
-  <circle cx="188" cy="132" r="10" fill="#9BE7FF" fill-opacity="0.55"/>
-  <circle cx="70" cy="98" r="8" fill="#9BE7FF" fill-opacity="0.3"/>
+  <rect width="256" height="256" rx="64" fill="#070F1C"/>
+  <rect x="24" y="24" width="208" height="208" rx="54" fill="url(#bg)" fill-opacity="0.08"/>
+  <rect x="52" y="52" width="152" height="152" rx="40" fill="#0B1628" stroke="url(#strokeGlow)" stroke-width="2"/>
+
+  <path d="M82 164V96" stroke="#94A3B8" stroke-opacity="0.45" stroke-width="10" stroke-linecap="round"/>
+  <path d="M116 164V122" stroke="#67E8F9" stroke-width="10" stroke-linecap="round"/>
+  <path d="M150 164V104" stroke="#38BDF8" stroke-width="10" stroke-linecap="round"/>
+
+  <path d="M86 116L118 98L148 112L174 84" stroke="url(#trend)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M162 84H174V96" stroke="#A5F3FC" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <circle cx="200" cy="56" r="10" fill="#22D3EE" fill-opacity="0.22"/>
+  <circle cx="56" cy="200" r="8" fill="#38BDF8" fill-opacity="0.2"/>
+
   <defs>
-    <linearGradient id="paint0_linear" x1="42" y1="58" x2="214" y2="214" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#22D3EE"/>
-      <stop offset="1" stop-color="#60A5FA"/>
+    <linearGradient id="trend" x1="86" y1="116" x2="174" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#22D3EE"/>
     </linearGradient>
+    <linearGradient id="strokeGlow" x1="52" y1="52" x2="204" y2="204" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67E8F9" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0.2"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(56 40) rotate(43.2643) scale(260.117)">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 </svg>
