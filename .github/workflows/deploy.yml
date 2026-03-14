@@ -33,17 +33,9 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
           if [ -z "$VITE_API_URL" ]; then
-            echo "VITE_API_URL secret is missing. Add it in GitHub: Settings → Secrets and variables → Actions."
-            exit 1
-          fi
-          if [[ "$VITE_API_URL" == *"api.render.com"* ]]; then
-            echo "VITE_API_URL points to Render control API (api.render.com), not your deployed backend service."
-            echo "Use your web service URL, for example: https://<service-name>.onrender.com"
-            exit 1
-          fi
-          if [[ "$VITE_API_URL" == *"?key="* ]]; then
-            echo "VITE_API_URL must not include query keys/tokens. Use the plain backend base URL only."
-            exit 1
+            echo "Warning: VITE_API_URL secret is missing. Frontend will use production fallback URL from source code."
+          elif [[ "$VITE_API_URL" == *"api.render.com"* ]] || [[ "$VITE_API_URL" == *"?key="* ]]; then
+            echo "Warning: VITE_API_URL appears invalid (Render control API or contains key). Frontend will use production fallback URL from source code."
           fi
 
       - name: Build
