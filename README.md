@@ -10,10 +10,10 @@ Production-ready AI career guidance platform that parses resumes, recommends rol
 ## Screenshots
 
 ### Dashboard (GitHub Pages)
-![CareerAI Dashboard](docs/screenshots/dashboard-home.png)
+![CareerAI Dashboard](https://raw.githubusercontent.com/gandharr/ai-career-platform/main/docs/screenshots/dashboard-home.png)
 
 ### Backend API Docs (Render)
-![CareerAI API Docs](docs/screenshots/api-docs.png)
+![CareerAI API Docs](https://raw.githubusercontent.com/gandharr/ai-career-platform/main/docs/screenshots/api-docs.png)
 
 ## Core Features
 - Resume parsing for `.pdf`, `.docx`, `.txt`
