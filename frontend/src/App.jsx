@@ -364,7 +364,7 @@ function App() {
           ) : null}
 
           <div className="panel px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-end gap-3">
               <button
                 type="button"
                 className="btn btn-ghost h-10 w-10 rounded-full p-0 text-lg"
@@ -375,9 +375,6 @@ function App() {
               >
                 ←
               </button>
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Step {Math.max(1, currentStepIndex + 1)} / {Math.max(1, navigableSections.length)}
-              </span>
               <button
                 type="button"
                 className="btn btn-primary h-10 w-10 rounded-full p-0 text-lg"
