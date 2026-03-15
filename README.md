@@ -23,8 +23,8 @@ An internship-ready full-stack platform that gives **deterministic**, skill-grou
 ![CareerAI API Docs](https://raw.githubusercontent.com/gandharr/ai-career-platform/main/docs/screenshots/api-docs.png)
 
 ## ✨ Key Highlights
-- Resume parsing for `.pdf` only
-- Resume/CV-only upload enforcement (non-resume documents are rejected)
+- Resume parsing for `.pdf`, `.docx`, and `.txt`
+- Resume/CV-only upload enforcement with content scoring (non-resume documents are rejected)
 - NLP-style dictionary-based skill extraction
 - Deterministic ranking (no random suggestions)
 - Top **10** recommendations with matched skills and score
@@ -34,25 +34,34 @@ An internship-ready full-stack platform that gives **deterministic**, skill-grou
 ## Recommendation Pipeline
 
 ### 1) Resume Text Extraction
-- Extract text from PDF
+- Validate allowed upload types: `.pdf`, `.docx`, `.txt`
+- Extract text from PDF with `pdfplumber`
+- Extract text from DOCX with `python-docx`
+- Extract text from TXT directly
 - Normalize to lowercase, clean symbols, normalize whitespace
 
-### 2) Skill Extraction
+### 2) Resume Validation
+- Reject unsupported file types immediately
+- Check for resume-like sections such as education, skills, experience, projects, certifications, internships, objective, and summary
+- Calculate a resume score from detected sections, contact details, and extracted skills
+- Reject unrelated content such as essays, reports, charters, blank files, and other non-resume documents
+
+### 3) Skill Extraction
 - Build dictionary from taxonomy + domain skill seeds
 - Detect exact and synonym-mapped skills from cleaned text
 
-### 3) Career–Skill Mapping Dataset
+### 4) Career-Skill Mapping Dataset
 - Structured role-to-skills mapping in `backend/app/data/taxonomy.py`
 - Covers CS, Business, Arts, Pharmacy, and more
 
-### 4) Career Matching Algorithm
+### 5) Career Matching Algorithm
 For each role:
 - `matched = user_skills ∩ role_required_skills`
 - `match_ratio = |matched| / |required|`
 - `cosine = |matched| / sqrt(|user| * |required|)`
 - `final_score = 0.65 * cosine + 0.35 * match_ratio`
 
-### 5) Output
+### 6) Output
 - Sort by score (descending)
 - Return top **10** careers with deterministic order
 
@@ -83,7 +92,7 @@ flowchart LR
 ## Project Structure
 - `frontend/` → dashboard UI, auth, charts, PDF export
 - `backend/app/main.py` → API routes/orchestration
-- `backend/app/services/resume_parser.py` → text + skill extraction
+- `backend/app/services/resume_parser.py` → file validation, text extraction, resume scoring, skill extraction
 - `backend/app/services/recommender.py` → deterministic recommendation logic
 - `backend/app/services/xai.py` → matched/missing explanation
 - `backend/app/services/skill_gap.py` → missing-skill priority report
@@ -119,7 +128,7 @@ npm run dev
 ## API Endpoints
 - `POST /auth/register`
 - `POST /auth/login`
-- `POST /parse-resume`
+- `POST /parse-resume` → accepts only resume-like `.pdf`, `.docx`, or `.txt` files
 - `POST /recommend-careers`
 - `POST /skill-gap`
 - `POST /learning-path`
@@ -138,6 +147,7 @@ Production notes:
 - Local Docker uses `mongodb://mongo:27017`.
 - Render production should use your hosted MongoDB connection string in `MONGO_URL`, typically `mongodb+srv://...` from MongoDB Atlas.
 - The backend now uses `certifi` CA certificates for hosted TLS/SRV Mongo connections.
+- Invalid Mongo URLs no longer crash app startup; `/health` reports the failure in `mongo_detail`.
 - If `/health` shows `mongo: down`, check `mongo_detail` in the same response to see the actual connection error.
 
 ### Frontend
