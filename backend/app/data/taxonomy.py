@@ -6,6 +6,11 @@ CAREER_TAXONOMY = {
                    "pandas", "numpy", "scikit-learn", "research methodology"],
         "salary_range_lpa": "8-25",
     },
+    "Data Engineer": {
+        "skills": ["python", "sql", "etl", "data pipelines", "apache spark",
+                   "airflow", "data warehousing", "postgresql", "cloud computing"],
+        "salary_range_lpa": "8-24",
+    },
     "Backend Developer": {
         "skills": ["python", "fastapi", "sql", "api", "docker", "node.js",
                    "rest api", "databases", "git"],

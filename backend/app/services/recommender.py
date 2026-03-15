@@ -10,6 +10,7 @@ from app.data.taxonomy import CAREER_TAXONOMY
 TECH_ROLE_SUBDOMAIN = {
     "Data Scientist": "data",
     "Data Analyst": "data",
+    "Data Engineer": "data",
     "ML Engineer": "ml",
     "NLP Engineer": "ml",
     "Backend Developer": "backend",
@@ -307,17 +308,27 @@ def hybrid_recommend(
 
     scored = []
     for role in CAREER_TAXONOMY.keys():
-        required_skills = {skill.lower() for skill in CAREER_TAXONOMY[role]["skills"]}
+        required_skill_list = [skill.lower() for skill in CAREER_TAXONOMY[role]["skills"]]
+        required_skills = set(required_skill_list)
         matched_count = len(user_skill_set & required_skills)
         direct_overlap = collab.get(role, 0.0)
         semantic_score = content.get(role, 0.0)
+        fuzzy_matched_required = _matched_required_skills(normalized_skills, required_skill_list)
+        fuzzy_matched_count = len(fuzzy_matched_required)
+        fuzzy_overlap_ratio = fuzzy_matched_count / max(1, len(required_skill_list))
 
         core_signal, _ = _core_stack_signal(normalized_skills, role)
         tool_signal = _tool_project_signal(normalized_skills, role)
         exp_signal = _experience_signal(experience_years, resume_text)
         cert_signal = _certification_signal(role, certifications)
 
+        if fuzzy_matched_count == 0:
+            continue
+
         if not allow_zero_overlap and matched_count == 0 and (direct_overlap < 0.22 or semantic_score < 0.20):
+            continue
+
+        if fuzzy_overlap_ratio < 0.15 and direct_overlap < 0.18 and semantic_score < 0.22:
             continue
 
         if tech_mode and role in TECH_ROLE_SUBDOMAIN and core_signal < 0.12 and tool_signal < 0.10 and semantic_score < 0.18:
@@ -347,6 +358,7 @@ def hybrid_recommend(
                     "content": round(content.get(role, 0.0), 3),
                     "collaborative": round(direct_overlap, 3),
                     "bert": round(bert.get(role, 0.0), 3),
+                    "matched_required_ratio": round(fuzzy_overlap_ratio, 3),
                     "core_stack": round(core_signal, 3),
                     "tool_project": round(tool_signal, 3),
                     "experience": round(exp_signal, 3),
@@ -376,6 +388,7 @@ def hybrid_recommend(
 
         has_skill_evidence = (
             method_scores.get("collaborative", 0.0) >= 0.20
+            or method_scores.get("matched_required_ratio", 0.0) >= 0.18
             or method_scores.get("core_stack", 0.0) >= 0.20
             or method_scores.get("tool_project", 0.0) >= 0.18
         )
