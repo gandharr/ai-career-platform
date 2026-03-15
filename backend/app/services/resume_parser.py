@@ -27,18 +27,18 @@ NOISE_WORDS = {
     "references",
 }
 
+TAXONOMY_SKILLS_SORTED = sorted(
+    {skill.strip().lower() for role in CAREER_TAXONOMY.values() for skill in role.get("skills", []) if skill and skill.strip()},
+    key=len,
+    reverse=True,
+)
+
 
 def _extract_taxonomy_skills(text: str) -> List[str]:
-    taxonomy_skills = sorted(
-        {skill.strip().lower() for role in CAREER_TAXONOMY.values() for skill in role.get("skills", []) if skill and skill.strip()},
-        key=len,
-        reverse=True,
-    )
-
     normalized_text = re.sub(r"\s+", " ", text.lower())
     matched: List[str] = []
 
-    for skill in taxonomy_skills:
+    for skill in TAXONOMY_SKILLS_SORTED:
         pattern = rf"(?<![a-z0-9]){re.escape(skill)}(?![a-z0-9])"
         if re.search(pattern, normalized_text):
             matched.append(skill)

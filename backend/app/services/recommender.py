@@ -104,6 +104,16 @@ EXPERIENCE_ACTION_KEYWORDS = {
     "automation",
 }
 
+ROLES = list(CAREER_TAXONOMY.keys())
+ROLE_REQUIRED_SKILLS = {
+    role: [skill.lower() for skill in details.get("skills", [])]
+    for role, details in CAREER_TAXONOMY.items()
+}
+ROLE_REQUIRED_SKILL_SETS = {role: set(skills) for role, skills in ROLE_REQUIRED_SKILLS.items()}
+ROLE_DOCS = [" ".join(ROLE_REQUIRED_SKILLS[role]) for role in ROLES]
+CONTENT_VECTORIZER = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5))
+ROLE_DOC_MATRIX = CONTENT_VECTORIZER.fit_transform(ROLE_DOCS)
+
 
 def _normalize_user_skills(user_skills: List[str]) -> List[str]:
     return sorted({skill.strip().lower() for skill in user_skills if skill and skill.strip()})
@@ -114,18 +124,15 @@ def _normalized_ratio(score: int | float) -> float:
 
 
 def _content_scores(user_skills: List[str]) -> Dict[str, float]:
-    roles = list(CAREER_TAXONOMY.keys())
-    role_docs = [" ".join(CAREER_TAXONOMY[role]["skills"]) for role in roles]
     user_doc = " ".join(user_skills)
 
     if not user_doc.strip():
-        return {role: 0.0 for role in roles}
+        return {role: 0.0 for role in ROLES}
 
-    vectorizer = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5))
-    matrix = vectorizer.fit_transform(role_docs + [user_doc])
-    sims = cosine_similarity(matrix[-1], matrix[:-1])[0]
+    user_vector = CONTENT_VECTORIZER.transform([user_doc])
+    sims = cosine_similarity(user_vector, ROLE_DOC_MATRIX)[0]
 
-    return {role: float(score) for role, score in zip(roles, sims)}
+    return {role: float(score) for role, score in zip(ROLES, sims)}
 
 
 def _matched_required_skills(user_skills: List[str], required_skills: List[str], threshold: int = 86) -> List[str]:
@@ -191,7 +198,7 @@ def _subdomain_scores(user_skills: List[str]) -> Dict[str, float]:
 
 
 def _core_stack_signal(user_skills: List[str], role: str) -> tuple[float, List[str]]:
-    required = [skill.lower() for skill in CAREER_TAXONOMY.get(role, {}).get("skills", [])]
+    required = ROLE_REQUIRED_SKILLS.get(role, [])
     core = required[: min(5, len(required))]
     if not core:
         return 0.0, []
@@ -201,7 +208,7 @@ def _core_stack_signal(user_skills: List[str], role: str) -> tuple[float, List[s
 
 
 def _tool_project_signal(user_skills: List[str], role: str) -> float:
-    required = [skill.lower() for skill in CAREER_TAXONOMY.get(role, {}).get("skills", [])]
+    required = ROLE_REQUIRED_SKILLS.get(role, [])
     tool_terms = [skill for skill in required if any(token in skill for token in TOOL_KEYWORDS) or skill in TOOL_KEYWORDS]
     if not tool_terms:
         tool_terms = required
@@ -239,8 +246,8 @@ def _certification_signal(role: str, certifications: Optional[List[str]]) -> flo
 
 def _collab_stub_scores(user_skills: List[str]) -> Dict[str, float]:
     priors = {}
-    for role, details in CAREER_TAXONOMY.items():
-        required = [skill.lower() for skill in details["skills"]]
+    for role in ROLES:
+        required = ROLE_REQUIRED_SKILLS.get(role, [])
         if not required:
             priors[role] = 0.0
             continue
@@ -253,8 +260,8 @@ def _collab_stub_scores(user_skills: List[str]) -> Dict[str, float]:
 def _bert_stub_scores(user_skills: List[str]) -> Dict[str, float]:
     user_set = set(user_skills)
     boosted = {}
-    for role, details in CAREER_TAXONOMY.items():
-        required = [skill.lower() for skill in details["skills"]]
+    for role in ROLES:
+        required = ROLE_REQUIRED_SKILLS.get(role, [])
         matched = _matched_required_skills(user_skills, required)
         required_set = set(required)
         overlap = len(set(matched))
@@ -264,7 +271,7 @@ def _bert_stub_scores(user_skills: List[str]) -> Dict[str, float]:
 
 
 def _build_reason(user_skills: List[str], role: str) -> str:
-    required = [skill.lower() for skill in CAREER_TAXONOMY.get(role, {}).get("skills", [])]
+    required = ROLE_REQUIRED_SKILLS.get(role, [])
     user_set = set(user_skills)
     core = required[: min(5, len(required))]
     matched = _matched_required_skills(user_skills, required)
@@ -319,9 +326,9 @@ def hybrid_recommend(
     w1, w2, w3 = 0.50, 0.35, 0.15
 
     scored = []
-    for role in CAREER_TAXONOMY.keys():
-        required_skill_list = [skill.lower() for skill in CAREER_TAXONOMY[role]["skills"]]
-        required_skills = set(required_skill_list)
+    for role in ROLES:
+        required_skill_list = ROLE_REQUIRED_SKILLS.get(role, [])
+        required_skills = ROLE_REQUIRED_SKILL_SETS.get(role, set())
         matched_count = len(user_skill_set & required_skills)
         direct_overlap = collab.get(role, 0.0)
         semantic_score = content.get(role, 0.0)
