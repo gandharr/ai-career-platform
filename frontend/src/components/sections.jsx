@@ -3,7 +3,7 @@ import { LogoMark, Meter, ProviderBadge, SectionFrame, SkillChip, Tabs, formatPe
 
 const GapRadarChart = lazy(() => import('./GapRadarChart'))
 
-export function HeroHeader({ isAuthenticated, onLogout, theme, onToggleTheme }) {
+export function HeroHeader({ isAuthenticated, onLogout }) {
   return (
     <header className="panel overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.14),transparent_28%),radial-gradient(circle_at_top_right,rgba(244,114,182,0.12),transparent_24%)]" />
@@ -17,9 +17,6 @@ export function HeroHeader({ isAuthenticated, onLogout, theme, onToggleTheme }) 
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={onToggleTheme} className="btn btn-ghost" aria-label="Toggle theme">
-              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-            </button>
             <span className={`status-pill ${isAuthenticated ? 'status-live' : 'status-idle'}`}>
               <span className={`h-2.5 w-2.5 rounded-full ${isAuthenticated ? 'bg-emerald-400' : 'bg-slate-500'}`} />
               {isAuthenticated ? 'Signed in' : 'Login required'}
@@ -75,35 +72,25 @@ export function HeroHeader({ isAuthenticated, onLogout, theme, onToggleTheme }) 
 export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveSection, dashboardItems }) {
   if (isAuthenticated) {
     return (
-      <section className="panel px-6 py-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Workspace dashboard</p>
-            <h2 className="text-xl font-semibold text-slate-50">Open a section</h2>
-          </div>
-          {activeSection !== 'dashboard' ? (
-            <button type="button" onClick={() => setActiveSection('dashboard')} className="btn btn-ghost">
-              Back to dashboard
-            </button>
-          ) : null}
-        </div>
-        <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="panel px-2 py-2">
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max items-center gap-2 rounded-xl border border-white/10 bg-slate-950/60 px-2 py-2">
           {dashboardItems.map((item) => (
             <button
               key={item.key}
               type="button"
               onClick={() => item.enabled && setActiveSection(item.key)}
               disabled={!item.enabled}
-              className={`h-full min-h-[96px] rounded-2xl border px-4 py-4 text-left transition ${
+              className={`rounded-lg px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] transition ${
                 activeSection === item.key
-                  ? 'border-cyan-400/40 bg-cyan-400/10'
-                  : 'border-white/10 bg-slate-950/60 hover:border-cyan-400/25 hover:bg-slate-900/70'
-              } ${!item.enabled ? 'cursor-not-allowed opacity-50' : ''}`}
+                  ? 'bg-cyan-400/15 text-cyan-200'
+                  : 'text-slate-300 hover:bg-white/5 hover:text-slate-100'
+              } ${!item.enabled ? 'cursor-not-allowed opacity-40' : ''}`}
             >
-              <p className="text-sm font-semibold text-slate-100">{item.label}</p>
-              <p className="mt-1 text-xs text-slate-400">{item.hint}</p>
+              {item.label}
             </button>
           ))}
+          </div>
         </div>
       </section>
     )
