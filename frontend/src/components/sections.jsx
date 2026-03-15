@@ -259,7 +259,7 @@ export function InputSection({ isAuthenticated, activeSection, inputTab, setInpu
               <LogoMark className="h-16 w-16 rounded-3xl" />
               <div className="space-y-1 text-center">
                 <p className="text-lg font-semibold text-slate-50">Drop your resume here or browse</p>
-                <p className="text-sm text-slate-400">Supported formats: PDF, DOCX, TXT</p>
+                <p className="text-sm text-slate-400">Only resume/CV files are accepted (.pdf, .docx, .txt)</p>
                 {resumeFile ? <p className="text-sm font-semibold text-cyan-200">Selected file: {resumeFile.name}</p> : null}
               </div>
               <input

@@ -130,8 +130,18 @@ function App() {
     return fallback
   }
 
+  const isAllowedResumeFile = (file) => {
+    const name = (file?.name || '').toLowerCase()
+    return name.endsWith('.pdf') || name.endsWith('.docx') || name.endsWith('.txt')
+  }
+
   const onUploadResume = async () => {
     if (!resumeFile) return
+
+    if (!isAllowedResumeFile(resumeFile)) {
+      setError('Only resume files in PDF, DOCX, or TXT format are accepted.')
+      return
+    }
 
     setError('')
     setLoadingMessage('Waking backend and parsing resume...')

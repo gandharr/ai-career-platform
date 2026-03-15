@@ -86,7 +86,7 @@ async def login_user(payload: UserLogin, db: Session = Depends(get_db)):
 
 @app.post("/parse-resume", response_model=ResumeParseResponse)
 async def parse_resume_endpoint(file: UploadFile = File(...)):
-    from app.services.resume_parser import parse_resume
+    from app.services.resume_parser import is_resume_profile, parse_resume
 
     file_name = (file.filename or "").lower()
     if not file_name.endswith((".pdf", ".docx", ".txt")):
@@ -94,6 +94,12 @@ async def parse_resume_endpoint(file: UploadFile = File(...)):
 
     content = await file.read()
     profile = parse_resume(content, filename=file_name)
+
+    if not is_resume_profile(profile):
+        raise HTTPException(
+            status_code=400,
+            detail="Only resume/CV documents are accepted. Please upload your resume file.",
+        )
 
     normalized = normalize_skills(profile["skills"], TAXONOMY_SKILLS)
     if normalized:

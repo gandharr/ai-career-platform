@@ -61,6 +61,21 @@ NOISE_TOKENS = {
     "references",
 }
 
+RESUME_SECTION_KEYWORDS = {
+    "education",
+    "experience",
+    "work experience",
+    "projects",
+    "skills",
+    "technical skills",
+    "certifications",
+    "internship",
+    "internships",
+    "objective",
+    "summary",
+    "profile",
+}
+
 
 def build_skill_dictionary() -> Set[str]:
     taxonomy_skills = {
@@ -170,3 +185,24 @@ def parse_resume(file_bytes: bytes, filename: str) -> Dict:
         "certifications": extract_certifications(lines),
         "raw_text": clean_text,
     }
+
+
+def is_resume_profile(profile: Dict) -> bool:
+    clean_text = (profile.get("raw_text") or "").lower()
+    name = (profile.get("name") or "").strip()
+    email = (profile.get("email") or "").strip()
+    skills_count = len(profile.get("skills") or [])
+    has_education = bool(profile.get("education"))
+    has_certifications = bool(profile.get("certifications"))
+    section_hits = sum(1 for keyword in RESUME_SECTION_KEYWORDS if keyword in clean_text)
+
+    has_identity_signals = bool(name) and bool(email)
+    has_resume_sections = section_hits >= 2
+    has_skill_depth = skills_count >= 2
+    has_supporting_content = has_education or has_certifications
+
+    return (
+        (has_identity_signals and has_skill_depth)
+        or (has_resume_sections and skills_count >= 3)
+        or (bool(email) and has_resume_sections and has_supporting_content)
+    )
