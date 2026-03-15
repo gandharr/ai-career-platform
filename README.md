@@ -23,7 +23,7 @@ An internship-ready full-stack platform that gives **deterministic**, skill-grou
 ![CareerAI API Docs](https://raw.githubusercontent.com/gandharr/ai-career-platform/main/docs/screenshots/api-docs.png)
 
 ## ✨ Key Highlights
-- Resume parsing for `.pdf`, `.docx`, `.txt`
+- Resume parsing for `.pdf` only
 - Resume/CV-only upload enforcement (non-resume documents are rejected)
 - NLP-style dictionary-based skill extraction
 - Deterministic ranking (no random suggestions)
@@ -34,7 +34,7 @@ An internship-ready full-stack platform that gives **deterministic**, skill-grou
 ## Recommendation Pipeline
 
 ### 1) Resume Text Extraction
-- Extract text from PDF, DOCX, TXT
+- Extract text from PDF
 - Normalize to lowercase, clean symbols, normalize whitespace
 
 ### 2) Skill Extraction

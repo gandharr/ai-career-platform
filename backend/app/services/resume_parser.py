@@ -3,7 +3,6 @@ from io import BytesIO
 from typing import Dict, List, Set
 
 import pdfplumber
-from docx import Document
 
 from app.data.taxonomy import CAREER_TAXONOMY
 
@@ -89,20 +88,17 @@ def build_skill_dictionary() -> Set[str]:
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
     pages: List[str] = []
-    with pdfplumber.open(BytesIO(file_bytes)) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text() or ""
-            if not page_text.strip():
-                words = page.extract_words() or []
-                page_text = " ".join(word.get("text", "") for word in words if word.get("text"))
-            pages.append(page_text)
+    try:
+        with pdfplumber.open(BytesIO(file_bytes)) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text() or ""
+                if not page_text.strip():
+                    words = page.extract_words() or []
+                    page_text = " ".join(word.get("text", "") for word in words if word.get("text"))
+                pages.append(page_text)
+    except Exception as exc:
+        raise ValueError("Unable to read the uploaded PDF resume.") from exc
     return "\n".join(pages)
-
-
-def extract_text_from_docx(file_bytes: bytes) -> str:
-    doc = Document(BytesIO(file_bytes))
-    paragraphs = [para.text for para in doc.paragraphs if para.text and para.text.strip()]
-    return "\n".join(paragraphs)
 
 
 def extract_resume_text(file_bytes: bytes, filename: str) -> str:
@@ -110,10 +106,8 @@ def extract_resume_text(file_bytes: bytes, filename: str) -> str:
 
     if lower_name.endswith(".pdf"):
         return extract_text_from_pdf(file_bytes)
-    if lower_name.endswith(".docx"):
-        return extract_text_from_docx(file_bytes)
 
-    return file_bytes.decode("utf-8-sig", errors="ignore")
+    raise ValueError("Only PDF resume files are accepted.")
 
 
 def clean_resume_text(text: str) -> str:
@@ -187,6 +181,15 @@ def parse_resume(file_bytes: bytes, filename: str) -> Dict:
     }
 
 
+def looks_like_person_name(name: str) -> bool:
+    tokens = [token for token in re.split(r"\s+", (name or "").strip()) if token]
+    if len(tokens) < 2 or len(tokens) > 5:
+        return False
+    if any(any(ch.isdigit() for ch in token) for token in tokens):
+        return False
+    return all(token.replace(".", "").replace("-", "").isalpha() for token in tokens)
+
+
 def is_resume_profile(profile: Dict) -> bool:
     clean_text = (profile.get("raw_text") or "").lower()
     name = (profile.get("name") or "").strip()
@@ -196,13 +199,12 @@ def is_resume_profile(profile: Dict) -> bool:
     has_certifications = bool(profile.get("certifications"))
     section_hits = sum(1 for keyword in RESUME_SECTION_KEYWORDS if keyword in clean_text)
 
-    has_identity_signals = bool(name) and bool(email)
+    has_identity_signals = looks_like_person_name(name) and bool(email)
     has_resume_sections = section_hits >= 2
     has_skill_depth = skills_count >= 2
     has_supporting_content = has_education or has_certifications
 
     return (
-        (has_identity_signals and has_skill_depth)
-        or (has_resume_sections and skills_count >= 3)
-        or (bool(email) and has_resume_sections and has_supporting_content)
+        (has_identity_signals and has_resume_sections and (has_skill_depth or has_supporting_content))
+        or (bool(email) and section_hits >= 3 and has_skill_depth and has_supporting_content)
     )

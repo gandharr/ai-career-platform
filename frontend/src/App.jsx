@@ -132,14 +132,32 @@ function App() {
 
   const isAllowedResumeFile = (file) => {
     const name = (file?.name || '').toLowerCase()
-    return name.endsWith('.pdf') || name.endsWith('.docx') || name.endsWith('.txt')
+    const type = (file?.type || '').toLowerCase()
+    return name.endsWith('.pdf') && (!type || type === 'application/pdf')
+  }
+
+  const onSelectResumeFile = (file) => {
+    if (!file) {
+      setResumeFile(null)
+      return
+    }
+
+    if (!isAllowedResumeFile(file)) {
+      setResumeFile(null)
+      setError('Only PDF resume files are accepted.')
+      return
+    }
+
+    setError('')
+    setResumeFile(file)
   }
 
   const onUploadResume = async () => {
     if (!resumeFile) return
 
     if (!isAllowedResumeFile(resumeFile)) {
-      setError('Only resume files in PDF, DOCX, or TXT format are accepted.')
+      setResumeFile(null)
+      setError('Only PDF resume files are accepted.')
       return
     }
 
@@ -496,7 +514,7 @@ function App() {
             onManualRecommend={onManualRecommend}
             loading={loading}
             resumeFile={resumeFile}
-            setResumeFile={setResumeFile}
+            onSelectResumeFile={onSelectResumeFile}
             onUploadResume={onUploadResume}
           />
 

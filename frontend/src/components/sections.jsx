@@ -221,7 +221,7 @@ export function AuthSection({ activeSection, isAuthenticated, authTab, setAuthTa
   )
 }
 
-export function InputSection({ isAuthenticated, activeSection, inputTab, setInputTab, manualSkills, setManualSkills, onManualRecommend, loading, resumeFile, setResumeFile, onUploadResume }) {
+export function InputSection({ isAuthenticated, activeSection, inputTab, setInputTab, manualSkills, setManualSkills, onManualRecommend, loading, resumeFile, onSelectResumeFile, onUploadResume }) {
   if (!(isAuthenticated && activeSection === 'input')) {
     return null
   }
@@ -259,14 +259,14 @@ export function InputSection({ isAuthenticated, activeSection, inputTab, setInpu
               <LogoMark className="h-16 w-16 rounded-3xl" />
               <div className="space-y-1 text-center">
                 <p className="text-lg font-semibold text-slate-50">Drop your resume here or browse</p>
-                <p className="text-sm text-slate-400">Only resume/CV files are accepted (.pdf, .docx, .txt)</p>
+                <p className="text-sm text-slate-400">Only resume/CV PDF files are accepted (.pdf)</p>
                 {resumeFile ? <p className="text-sm font-semibold text-cyan-200">Selected file: {resumeFile.name}</p> : null}
               </div>
               <input
                 type="file"
-                accept=".pdf,.docx,.txt"
+                accept=".pdf,application/pdf"
                 className="hidden"
-                onChange={(event) => setResumeFile(event.target.files?.[0] || null)}
+                onChange={(event) => onSelectResumeFile(event.target.files?.[0] || null)}
               />
             </label>
             <button type="button" onClick={onUploadResume} disabled={!resumeFile || loading} className="btn btn-primary">
