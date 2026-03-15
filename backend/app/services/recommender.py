@@ -376,35 +376,69 @@ def hybrid_recommend(
         return []
 
     best_confidence = scored[0]["confidence"]
-    minimum_confidence = max(0.22, round(best_confidence * 0.60, 3))
+    strict_minimum_confidence = max(0.22, round(best_confidence * 0.60, 3))
+    related_minimum_confidence = max(0.12, round(best_confidence * 0.30, 3))
+    target_count = 5 if tech_mode else 4
+    max_count = 7 if tech_mode else 6
 
     qualified = []
+    related_candidates = []
     for item in scored:
         method_scores = item["method_scores"]
         confidence = item["confidence"]
+        role = item["role"]
 
-        if confidence < minimum_confidence:
+        if tech_mode and role not in TECH_ROLE_SUBDOMAIN and method_scores.get("matched_required_ratio", 0.0) < 0.30:
             continue
 
-        has_skill_evidence = (
+        has_strict_skill_evidence = (
             method_scores.get("collaborative", 0.0) >= 0.20
             or method_scores.get("matched_required_ratio", 0.0) >= 0.18
             or method_scores.get("core_stack", 0.0) >= 0.20
             or method_scores.get("tool_project", 0.0) >= 0.18
         )
-        has_semantic_evidence = (
+        has_strict_semantic_evidence = (
             method_scores.get("content", 0.0) >= 0.24
             or method_scores.get("bert", 0.0) >= 0.20
         )
 
-        if not (has_skill_evidence or has_semantic_evidence):
+        if confidence >= strict_minimum_confidence and (has_strict_skill_evidence or has_strict_semantic_evidence):
+            qualified.append(item)
             continue
 
-        qualified.append(item)
+        has_related_skill_evidence = (
+            method_scores.get("collaborative", 0.0) >= 0.10
+            or method_scores.get("matched_required_ratio", 0.0) >= 0.10
+            or method_scores.get("core_stack", 0.0) >= 0.10
+            or method_scores.get("tool_project", 0.0) >= 0.10
+        )
+        has_related_semantic_evidence = (
+            method_scores.get("content", 0.0) >= 0.16
+            or method_scores.get("bert", 0.0) >= 0.13
+        )
+
+        if confidence >= related_minimum_confidence and has_related_skill_evidence and (
+            has_related_semantic_evidence or method_scores.get("matched_required_ratio", 0.0) >= 0.18
+        ):
+            related_candidates.append(item)
+
+    if not qualified and related_candidates:
+        qualified.append(related_candidates[0])
 
     if not qualified:
         return []
 
+    existing_roles = {item["role"] for item in qualified}
+    if len(qualified) < target_count:
+        for candidate in related_candidates:
+            if candidate["role"] in existing_roles:
+                continue
+            qualified.append(candidate)
+            existing_roles.add(candidate["role"])
+            if len(qualified) >= target_count:
+                break
+
+    qualified = qualified[:max_count]
     if top_n is not None:
         return qualified[:top_n]
     return qualified
