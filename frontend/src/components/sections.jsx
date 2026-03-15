@@ -3,7 +3,7 @@ import { LogoMark, Meter, ProviderBadge, SectionFrame, SkillChip, Tabs, formatPe
 
 const GapRadarChart = lazy(() => import('./GapRadarChart'))
 
-export function HeroHeader({ isAuthenticated, onLogout }) {
+export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegister }) {
   return (
     <header className="panel overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.14),transparent_28%),radial-gradient(circle_at_top_right,rgba(244,114,182,0.12),transparent_24%)]" />
@@ -25,7 +25,16 @@ export function HeroHeader({ isAuthenticated, onLogout }) {
               <button type="button" onClick={onLogout} className="btn btn-ghost">
                 Sign out
               </button>
-            ) : null}
+            ) : (
+              <>
+                <button type="button" onClick={onOpenLogin} className="btn btn-ghost">
+                  Login
+                </button>
+                <button type="button" onClick={onOpenRegister} className="btn btn-primary">
+                  Register
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

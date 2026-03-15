@@ -264,6 +264,16 @@ function App() {
     showMessage('Signed out.')
   }
 
+  const onOpenLogin = () => {
+    setAuthTab('login')
+    setActiveSection('auth')
+  }
+
+  const onOpenRegister = () => {
+    setAuthTab('register')
+    setActiveSection('auth')
+  }
+
   const onAnalyzeGap = async () => {
     if (!profile || !selectedRole) return
 
@@ -370,7 +380,14 @@ function App() {
   return (
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
-        {showHeroHeader ? <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} /> : null}
+        {showHeroHeader ? (
+          <HeroHeader
+            isAuthenticated={isAuthenticated}
+            onLogout={onLogout}
+            onOpenLogin={onOpenLogin}
+            onOpenRegister={onOpenRegister}
+          />
+        ) : null}
 
         <main className={`${showHeroHeader ? 'mt-8' : 'mt-2'} space-y-6`}>
           {successMsg ? <div className="notice success">{successMsg}</div> : null}
