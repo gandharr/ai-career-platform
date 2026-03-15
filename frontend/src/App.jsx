@@ -379,6 +379,21 @@ function App() {
 
   return (
     <div className="app-shell">
+      {loading ? (
+        <div className="progress-bar-track">
+          <div className="progress-bar-fill" />
+        </div>
+      ) : null}
+
+      <div className="toast-stack">
+        {successMsg ? (
+          <div className="toast toast-success">&#10003;&nbsp; {successMsg}</div>
+        ) : null}
+        {error ? (
+          <div className="toast toast-error">&#10005;&nbsp; {error}</div>
+        ) : null}
+      </div>
+
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
         {showHeroHeader ? (
           <HeroHeader
@@ -390,26 +405,6 @@ function App() {
         ) : null}
 
         <main className={`${showHeroHeader ? 'mt-8' : 'mt-2'} space-y-6`}>
-          {successMsg ? <div className="notice success">{successMsg}</div> : null}
-          {error ? <div className="notice error">{error}</div> : null}
-          {backendWarming ? (
-            <div className="panel px-6 py-4">
-              <div className="flex items-center gap-3 text-slate-300">
-                <div className="spinner" />
-                <span>Waking backend server for faster responses...</span>
-              </div>
-            </div>
-          ) : null}
-
-          {loading ? (
-            <div className="panel px-6 py-10">
-              <div className="flex items-center justify-center gap-3 text-slate-300">
-                <div className="spinner" />
-                <span>{loadingMessage}</span>
-              </div>
-            </div>
-          ) : null}
-
           {isAuthenticated && activeSection !== 'dashboard' && navigableSections.length > 1 ? (
             <div className="flex items-center justify-end gap-3 px-1">
               <button
