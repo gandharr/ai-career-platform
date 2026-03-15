@@ -325,7 +325,7 @@ export function ProfileSection({ isAuthenticated, activeSection, profile }) {
   )
 }
 
-export function RecommendationsSection({ isAuthenticated, activeSection, recommendations, selectedRole, setSelectedRole, onAnalyzeGap, onExportPdf, loading }) {
+export function RecommendationsSection({ isAuthenticated, activeSection, recommendations, explainability, selectedRole, setSelectedRole, onAnalyzeGap, onExportPdf, loading }) {
   if (!(isAuthenticated && activeSection === 'recommendations' && recommendations.length > 0)) {
     return null
   }
@@ -336,6 +336,28 @@ export function RecommendationsSection({ isAuthenticated, activeSection, recomme
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recommendations.map((item, index) => {
             const active = selectedRole === item.role
+            const xai = explainability?.[item.role] || {}
+            const matched = Array.isArray(xai.matched) ? xai.matched : []
+            const missing = Array.isArray(xai.missing) ? xai.missing : []
+            const requiredCount = matched.length + missing.length
+            const matchedPreview = matched.slice(0, 3)
+            const hiddenMatchedCount = Math.max(0, matched.length - matchedPreview.length)
+            const missingPreview = missing.slice(0, 2)
+
+            let computedReason = item.reason
+            if (requiredCount > 0) {
+              computedReason = `Matched ${matched.length}/${requiredCount} required skills`
+              if (matchedPreview.length > 0) {
+                computedReason += `: ${matchedPreview.join(', ')}`
+                if (hiddenMatchedCount > 0) {
+                  computedReason += ` (+${hiddenMatchedCount} more)`
+                }
+              }
+              if (missingPreview.length > 0) {
+                computedReason += `. Must-have missing: ${missingPreview.join(', ')}`
+              }
+            }
+
             return (
               <button
                 key={item.role}
@@ -350,7 +372,7 @@ export function RecommendationsSection({ isAuthenticated, activeSection, recomme
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <p className="text-lg font-semibold text-slate-50">{item.role}</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-400">{item.reason}</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">{computedReason}</p>
                   </div>
                   {index === 0 ? <span className="tag-pill">Top pick</span> : null}
                 </div>

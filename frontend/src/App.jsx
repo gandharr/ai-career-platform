@@ -470,6 +470,7 @@ function App() {
             isAuthenticated={isAuthenticated}
             activeSection={activeSection}
             recommendations={recommendations}
+            explainability={explainability}
             selectedRole={selectedRole}
             setSelectedRole={setSelectedRole}
             onAnalyzeGap={onAnalyzeGap}
