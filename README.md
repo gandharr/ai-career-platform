@@ -142,9 +142,3 @@ npm run dev
 ./scripts/demo.ps1
 ./scripts/cleanup.ps1
 ```
-
-## Viva / Presentation Talking Points
-- **Problem:** generic cross-domain mismatches in recommendations
-- **Fix:** deterministic, skill-grounded ranking pipeline
-- **Result:** reliable domain-aligned output for CS, Arts, Pharmacy, Business resumes
-- **Value:** explainable recommendations with actionable learning path
