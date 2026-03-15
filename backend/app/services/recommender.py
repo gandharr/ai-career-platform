@@ -272,18 +272,24 @@ def _bert_stub_scores(user_skills: List[str]) -> Dict[str, float]:
 
 def _build_reason(user_skills: List[str], role: str) -> str:
     required = ROLE_REQUIRED_SKILLS.get(role, [])
-    user_set = set(user_skills)
     core = required[: min(5, len(required))]
     matched = _matched_required_skills(user_skills, required)
     matched_core = _matched_required_skills(user_skills, core)
-    missing = [skill for skill in required if skill not in user_set]
-    missing_core = [skill for skill in core if skill not in {s.lower() for s in matched_core}]
+    matched_set = set(matched)
+    matched_core_set = set(matched_core)
+    missing = [skill for skill in required if skill not in matched_set]
+    missing_core = [skill for skill in core if skill not in matched_core_set]
 
     if matched:
-        matched_preview = ", ".join(matched[:3])
+        preview_count = 3
+        matched_preview_list = matched[:preview_count]
+        matched_preview = ", ".join(matched_preview_list)
         reason = f"Matched {len(matched)}/{len(required)} required skills"
         if matched_preview:
+            hidden_count = max(0, len(matched) - len(matched_preview_list))
             reason += f": {matched_preview}"
+            if hidden_count > 0:
+                reason += f" (+{hidden_count} more)"
         if missing_core:
             reason += f". Must-have missing: {', '.join(missing_core[:2])}"
         elif missing:
