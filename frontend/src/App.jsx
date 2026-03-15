@@ -40,7 +40,7 @@ function App() {
   const [successMsg, setSuccessMsg] = useState('')
   const [authTab, setAuthTab] = useState('login')
   const [inputTab, setInputTab] = useState('upload')
-  const [activeSection, setActiveSection] = useState(token ? 'input' : 'auth')
+  const [activeSection, setActiveSection] = useState(token ? 'input' : 'dashboard')
   const flashTimeoutRef = useRef(0)
 
   useEffect(() => {
@@ -55,7 +55,7 @@ function App() {
 
   useEffect(() => {
     if (!token) {
-      setActiveSection('auth')
+      setActiveSection('dashboard')
     }
   }, [token])
 
@@ -267,7 +267,7 @@ function App() {
     setManualSkills('')
     setAuth({ name: '', email: '', password: '' })
     setError('')
-    setActiveSection('auth')
+    setActiveSection('dashboard')
     showMessage('Signed out.')
   }
 
@@ -347,7 +347,7 @@ function App() {
   const isAuthenticated = Boolean((token || '').trim())
   const showHeroHeader = true
   const orderedSectionKeys = ['input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
-  const navigableSections = isAuthenticated ? orderedSectionKeys : ['auth']
+  const navigableSections = isAuthenticated ? orderedSectionKeys : ['dashboard']
   const currentStepIndex = navigableSections.indexOf(activeSection)
   const previousSection = currentStepIndex > 0 ? navigableSections[currentStepIndex - 1] : null
   const nextSection =
@@ -408,7 +408,13 @@ function App() {
             onLogout={onLogout}
             onOpenLogin={onOpenLogin}
             onOpenRegister={onOpenRegister}
-            onGetStarted={() => setActiveSection(isAuthenticated ? 'input' : 'auth')}
+            onGetStarted={() => {
+              if (isAuthenticated) {
+                setActiveSection('input')
+                return
+              }
+              setError('Please click Login to continue.')
+            }}
           />
         ) : null}
 
