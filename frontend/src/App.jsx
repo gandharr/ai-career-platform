@@ -3,7 +3,6 @@ import {
   warmUpBackend,
   getLearningPath,
   getSkillGap,
-  getUserProfile,
   loginUser,
   parseResume,
   recommendCareers,
@@ -17,7 +16,6 @@ import {
   ExplainabilitySection,
   GapSection,
   HeroHeader,
-  HistorySection,
   InputSection,
   LearningSection,
   ProfileSection,
@@ -35,7 +33,6 @@ function App() {
   const [manualSkills, setManualSkills] = useState('')
   const [auth, setAuth] = useState({ name: '', email: '', password: '' })
   const [token, setToken] = useState(sessionStorage.getItem('career_token') || '')
-  const [profileHistory, setProfileHistory] = useState([])
   const [loading, setLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('Processing your request...')
   const [backendReady, setBackendReady] = useState(false)
@@ -45,15 +42,13 @@ function App() {
   const [authTab, setAuthTab] = useState('login')
   const [inputTab, setInputTab] = useState('manual')
   const [activeSection, setActiveSection] = useState('dashboard')
-  const [theme, setTheme] = useState(localStorage.getItem('career_theme') || 'dark')
   const flashTimeoutRef = useRef(0)
 
   useEffect(() => {
-    const nextTheme = theme === 'light' ? 'light' : 'dark'
-    document.documentElement.setAttribute('data-theme', nextTheme)
-    document.body.classList.toggle('theme-light', nextTheme === 'light')
-    localStorage.setItem('career_theme', nextTheme)
-  }, [theme])
+    document.documentElement.setAttribute('data-theme', 'dark')
+    document.body.classList.remove('theme-light')
+    localStorage.setItem('career_theme', 'dark')
+  }, [])
 
   useEffect(() => {
     setAuthToken(token || '')
@@ -63,24 +58,6 @@ function App() {
     if (!token) {
       setActiveSection('auth')
     }
-  }, [token])
-
-  const refreshProfileHistory = async () => {
-    try {
-      const profileRes = await getUserProfile()
-      setProfileHistory(profileRes.recent_recommendations || [])
-    } catch {
-      setProfileHistory([])
-    }
-  }
-
-  useEffect(() => {
-    if (!token) {
-      setProfileHistory([])
-      return
-    }
-
-    void refreshProfileHistory()
   }, [token])
 
   useEffect(() => {
@@ -282,14 +259,9 @@ function App() {
     setExplainability({})
     setManualSkills('')
     setAuth({ name: '', email: '', password: '' })
-    setProfileHistory([])
     setError('')
     setActiveSection('auth')
     showMessage('Signed out.')
-  }
-
-  const onToggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }
 
   const onAnalyzeGap = async () => {
@@ -399,18 +371,12 @@ function App() {
       hint: 'Recommended courses/resources',
       enabled: isAuthenticated && resources.length > 0,
     },
-    {
-      key: 'history',
-      label: 'Saved History',
-      hint: 'Recent recommendation history',
-      enabled: isAuthenticated && profileHistory.length > 0,
-    },
   ]
 
   return (
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
-        <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} theme={theme} onToggleTheme={onToggleTheme} />
+        <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} />
 
         <main className="mt-8 space-y-6">
           {successMsg ? <div className="notice success">{successMsg}</div> : null}
@@ -489,8 +455,6 @@ function App() {
           <GapSection isAuthenticated={isAuthenticated} activeSection={activeSection} gapReport={gapReport} chartData={chartData} />
 
           <LearningSection isAuthenticated={isAuthenticated} activeSection={activeSection} resources={resources} />
-
-          <HistorySection isAuthenticated={isAuthenticated} activeSection={activeSection} profileHistory={profileHistory} />
         </main>
 
         <footer className="mt-8 rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-4 text-center text-[13px] font-medium tracking-[0.02em] text-slate-300">
