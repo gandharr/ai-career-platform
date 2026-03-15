@@ -325,6 +325,9 @@ def hybrid_recommend(
         if fuzzy_matched_count == 0:
             continue
 
+        if fuzzy_matched_count < 2 and fuzzy_overlap_ratio < 0.22:
+            continue
+
         if not allow_zero_overlap and matched_count == 0 and (direct_overlap < 0.22 or semantic_score < 0.20):
             continue
 
@@ -358,6 +361,7 @@ def hybrid_recommend(
                     "content": round(content.get(role, 0.0), 3),
                     "collaborative": round(direct_overlap, 3),
                     "bert": round(bert.get(role, 0.0), 3),
+                    "matched_required_count": fuzzy_matched_count,
                     "matched_required_ratio": round(fuzzy_overlap_ratio, 3),
                     "core_stack": round(core_signal, 3),
                     "tool_project": round(tool_signal, 3),
@@ -389,7 +393,8 @@ def hybrid_recommend(
         role = item["role"]
 
         has_strict_skill_evidence = (
-            method_scores.get("collaborative", 0.0) >= 0.20
+            method_scores.get("matched_required_count", 0) >= 2
+            or method_scores.get("collaborative", 0.0) >= 0.20
             or method_scores.get("matched_required_ratio", 0.0) >= 0.18
             or method_scores.get("core_stack", 0.0) >= 0.20
             or method_scores.get("tool_project", 0.0) >= 0.18
@@ -404,7 +409,8 @@ def hybrid_recommend(
             continue
 
         has_related_skill_evidence = (
-            method_scores.get("collaborative", 0.0) >= 0.10
+            method_scores.get("matched_required_count", 0) >= 2
+            or method_scores.get("collaborative", 0.0) >= 0.10
             or method_scores.get("matched_required_ratio", 0.0) >= 0.10
             or method_scores.get("core_stack", 0.0) >= 0.10
             or method_scores.get("tool_project", 0.0) >= 0.10
