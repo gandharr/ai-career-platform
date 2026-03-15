@@ -31,7 +31,7 @@ function App() {
   const [explainability, setExplainability] = useState({})
   const [manualSkills, setManualSkills] = useState('')
   const [auth, setAuth] = useState({ name: '', email: '', password: '' })
-  const [token, setToken] = useState(sessionStorage.getItem('career_token') || '')
+  const [token, setToken] = useState(localStorage.getItem('career_token') || sessionStorage.getItem('career_token') || '')
   const [loading, setLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('Processing your request...')
   const [backendReady, setBackendReady] = useState(false)
@@ -60,8 +60,6 @@ function App() {
   }, [token])
 
   useEffect(() => {
-    localStorage.removeItem('career_token')
-
     const timerId = window.setTimeout(() => {
       setAuth({ name: '', email: '', password: '' })
     }, 120)
@@ -205,6 +203,7 @@ function App() {
       }
 
       sessionStorage.setItem('career_token', accessToken)
+      localStorage.setItem('career_token', accessToken)
       setAuthToken(accessToken)
       setToken(accessToken)
       setActiveSection('dashboard')
@@ -233,6 +232,7 @@ function App() {
       }
 
       sessionStorage.setItem('career_token', accessToken)
+      localStorage.setItem('career_token', accessToken)
       setAuthToken(accessToken)
       setToken(accessToken)
 
@@ -247,6 +247,7 @@ function App() {
 
   const onLogout = () => {
     sessionStorage.removeItem('career_token')
+    localStorage.removeItem('career_token')
     setAuthToken('')
     setToken('')
     setResumeFile(null)
