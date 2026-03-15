@@ -133,7 +133,18 @@ function App() {
   const isAllowedResumeFile = (file) => {
     const name = (file?.name || '').toLowerCase()
     const type = (file?.type || '').toLowerCase()
-    return name.endsWith('.pdf') && (!type || type === 'application/pdf')
+    const allowedExtensions = ['.pdf', '.docx', '.txt']
+    const hasAllowedExtension = allowedExtensions.some((extension) => name.endsWith(extension))
+    const allowedTypes = [
+      'application/pdf',
+      'application/x-pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'text/plain',
+      '',
+    ]
+
+    return hasAllowedExtension && allowedTypes.includes(type)
   }
 
   const onSelectResumeFile = (file) => {
@@ -144,7 +155,7 @@ function App() {
 
     if (!isAllowedResumeFile(file)) {
       setResumeFile(null)
-      setError('Only PDF resume files are accepted.')
+      setError('Only PDF, DOCX, or TXT resume files are accepted.')
       return
     }
 
@@ -157,7 +168,7 @@ function App() {
 
     if (!isAllowedResumeFile(resumeFile)) {
       setResumeFile(null)
-      setError('Only PDF resume files are accepted.')
+      setError('Only PDF, DOCX, or TXT resume files are accepted.')
       return
     }
 

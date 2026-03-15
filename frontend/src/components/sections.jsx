@@ -259,12 +259,12 @@ export function InputSection({ isAuthenticated, activeSection, inputTab, setInpu
               <LogoMark className="h-16 w-16 rounded-3xl" />
               <div className="space-y-1 text-center">
                 <p className="text-lg font-semibold text-slate-50">Drop your resume here or browse</p>
-                <p className="text-sm text-slate-400">Only resume/CV PDF files are accepted (.pdf)</p>
+                <p className="text-sm text-slate-400">Only resume/CV files are accepted (.pdf, .docx, .txt)</p>
                 {resumeFile ? <p className="text-sm font-semibold text-cyan-200">Selected file: {resumeFile.name}</p> : null}
               </div>
               <input
                 type="file"
-                accept=".pdf,application/pdf"
+                accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
                 className="hidden"
                 onChange={(event) => onSelectResumeFile(event.target.files?.[0] || null)}
               />

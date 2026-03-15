@@ -28,17 +28,6 @@ from app.services.auth import create_access_token, hash_password, verify_passwor
 from app.services.learning_resources import suggest_learning_resources
 from app.services.skill_gap import skill_gap_report
 from app.services.skill_normalizer import normalize_skills
-
-
-ALLOWED_PDF_CONTENT_TYPES = {"application/pdf", "application/x-pdf"}
-
-
-def is_pdf_resume_upload(file_name: str, content_type: str, content: bytes) -> bool:
-    normalized_content_type = (content_type or "").split(";", 1)[0].strip().lower()
-    has_allowed_extension = file_name.endswith(".pdf")
-    has_allowed_content_type = not normalized_content_type or normalized_content_type in ALLOWED_PDF_CONTENT_TYPES
-    has_pdf_signature = content.startswith(b"%PDF-")
-    return has_allowed_extension and has_allowed_content_type and has_pdf_signature
 from app.services.xai import role_explanation
 
 app = FastAPI(title="AI Career Recommendation API", version="0.1.0")
@@ -99,23 +88,15 @@ async def login_user(payload: UserLogin, db: Session = Depends(get_db)):
 
 @app.post("/parse-resume", response_model=ResumeParseResponse)
 async def parse_resume_endpoint(file: UploadFile = File(...)):
-    from app.services.resume_parser import is_resume_profile, parse_resume
+    from app.services.resume_parser import process_resume
 
     file_name = (file.filename or "").lower()
     content = await file.read()
-    if not is_pdf_resume_upload(file_name, file.content_type or "", content):
-        raise HTTPException(status_code=400, detail="Only PDF resume files are accepted.")
 
     try:
-        profile = parse_resume(content, filename=file_name)
+        profile = process_resume(content, filename=file_name, content_type=file.content_type or "")
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    if not is_resume_profile(profile):
-        raise HTTPException(
-            status_code=400,
-            detail="Only valid resume/CV PDFs are accepted. Please upload your resume file.",
-        )
 
     normalized = normalize_skills(profile["skills"], TAXONOMY_SKILLS)
     if normalized:

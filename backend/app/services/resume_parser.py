@@ -3,12 +3,21 @@ from io import BytesIO
 from typing import Dict, List, Set
 
 import pdfplumber
+from docx import Document
 
 from app.data.taxonomy import CAREER_TAXONOMY
 
 
 EMAIL_PATTERN = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
 PHONE_PATTERN = r"(?:\+?\d{1,3}[\s\-]?)?(?:\(?\d{3,4}\)?[\s\-]?)?\d{3}[\s\-]?\d{4}"
+ALLOWED_FILE_EXTENSIONS = {".pdf", ".docx", ".txt"}
+ALLOWED_PDF_CONTENT_TYPES = {"application/pdf", "application/x-pdf"}
+ALLOWED_DOCX_CONTENT_TYPES = {
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
+}
+ALLOWED_TEXT_CONTENT_TYPES = {"text/plain"}
+MIN_RESUME_SCORE = 5
 
 BASE_SKILL_DICTIONARY = {
     "python",
@@ -143,6 +152,13 @@ NON_RESUME_DOCUMENT_KEYWORDS = {
 }
 
 
+def get_file_extension(filename: str) -> str:
+    normalized = (filename or "").strip().lower()
+    if "." not in normalized:
+        return ""
+    return f".{normalized.rsplit('.', 1)[-1]}"
+
+
 def build_skill_dictionary() -> Set[str]:
     taxonomy_skills = {
         skill.strip().lower()
@@ -151,6 +167,38 @@ def build_skill_dictionary() -> Set[str]:
         if isinstance(skill, str) and skill.strip()
     }
     return taxonomy_skills.union(BASE_SKILL_DICTIONARY)
+
+
+def validate_file_type(file_name: str, content_type: str, content: bytes) -> str:
+    extension = get_file_extension(file_name)
+    normalized_content_type = (content_type or "").split(";", 1)[0].strip().lower()
+
+    if extension not in ALLOWED_FILE_EXTENSIONS:
+        raise ValueError("Only PDF, DOCX, or TXT resume files are accepted.")
+
+    if extension == ".pdf":
+        has_allowed_content_type = not normalized_content_type or normalized_content_type in ALLOWED_PDF_CONTENT_TYPES
+        if not has_allowed_content_type or not content.startswith(b"%PDF-"):
+            raise ValueError("The uploaded PDF file is invalid.")
+        return extension
+
+    if extension == ".docx":
+        has_allowed_content_type = not normalized_content_type or normalized_content_type in ALLOWED_DOCX_CONTENT_TYPES
+        if not has_allowed_content_type or not content.startswith(b"PK"):
+            raise ValueError("The uploaded DOCX file is invalid.")
+        return extension
+
+    if extension == ".txt":
+        has_allowed_content_type = not normalized_content_type or normalized_content_type in ALLOWED_TEXT_CONTENT_TYPES
+        if not has_allowed_content_type:
+            raise ValueError("The uploaded TXT file is invalid.")
+        try:
+            content.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ValueError("The uploaded TXT file could not be read.") from exc
+        return extension
+
+    raise ValueError("Unsupported resume file type.")
 
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
@@ -168,13 +216,39 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
     return "\n".join(pages)
 
 
-def extract_resume_text(file_bytes: bytes, filename: str) -> str:
-    lower_name = (filename or "").lower()
+def extract_text_from_docx(file_bytes: bytes) -> str:
+    try:
+        document = Document(BytesIO(file_bytes))
+    except Exception as exc:
+        raise ValueError("Unable to read the uploaded DOCX resume.") from exc
 
-    if lower_name.endswith(".pdf"):
+    paragraphs = [paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text and paragraph.text.strip()]
+    return "\n".join(paragraphs)
+
+
+def extract_text_from_txt(file_bytes: bytes) -> str:
+    try:
+        return file_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        try:
+            return file_bytes.decode("latin-1")
+        except UnicodeDecodeError as exc:
+            raise ValueError("Unable to read the uploaded TXT resume.") from exc
+
+
+def extract_resume_text(file_bytes: bytes, filename: str) -> str:
+    extension = get_file_extension(filename)
+
+    if extension == ".pdf":
         return extract_text_from_pdf(file_bytes)
 
-    raise ValueError("Only PDF resume files are accepted.")
+    if extension == ".docx":
+        return extract_text_from_docx(file_bytes)
+
+    if extension == ".txt":
+        return extract_text_from_txt(file_bytes)
+
+    raise ValueError("Only PDF, DOCX, or TXT resume files are accepted.")
 
 
 def clean_resume_text(text: str) -> str:
@@ -252,12 +326,54 @@ def count_keyword_hits(text: str, keywords: Set[str]) -> int:
     return sum(1 for keyword in keywords if keyword in normalized_text)
 
 
-def parse_resume(file_bytes: bytes, filename: str) -> Dict:
-    raw_text = extract_resume_text(file_bytes, filename)
-    lines = extract_resume_lines(raw_text)
+def validate_resume_content(raw_text: str, extracted_skills: List[str], filename: str = "") -> Dict[str, int | bool]:
     clean_text = clean_resume_text(raw_text)
+    section_hits = count_keyword_hits(clean_text, RESUME_SECTION_KEYWORDS)
+    core_section_hits = count_keyword_hits(clean_text, CORE_RESUME_SECTION_KEYWORDS)
+    title_hits = count_keyword_hits(clean_text, RESUME_TITLE_HINTS)
+    non_resume_hits = count_keyword_hits(clean_text, NON_RESUME_DOCUMENT_KEYWORDS)
+    filename_non_resume_hits = count_keyword_hits((filename or "").lower(), NON_RESUME_DOCUMENT_KEYWORDS)
+    lines = extract_resume_lines(raw_text)
 
-    email_match = re.search(EMAIL_PATTERN, raw_text)
+    has_resume_keywords = section_hits > 0
+    if not has_resume_keywords:
+        return {
+            "is_valid": False,
+            "score": 0,
+            "section_hits": section_hits,
+            "skill_hits": len(extracted_skills),
+            "non_resume_hits": non_resume_hits + filename_non_resume_hits,
+        }
+
+    score = section_hits + min(3, len(extracted_skills))
+    if core_section_hits >= 2:
+        score += 2
+    if len(lines) >= 6:
+        score += 1
+    if re.search(EMAIL_PATTERN, raw_text or ""):
+        score += 1
+    if re.search(PHONE_PATTERN, raw_text or ""):
+        score += 1
+    if title_hits:
+        score += 1
+    score -= min(4, non_resume_hits + filename_non_resume_hits)
+
+    is_valid = score >= MIN_RESUME_SCORE and (non_resume_hits + filename_non_resume_hits) < 3
+    return {
+        "is_valid": is_valid,
+        "score": score,
+        "section_hits": section_hits,
+        "skill_hits": len(extracted_skills),
+        "non_resume_hits": non_resume_hits + filename_non_resume_hits,
+    }
+
+
+def parse_resume(file_bytes: bytes, filename: str) -> Dict:
+    source_text = extract_resume_text(file_bytes, filename)
+    lines = extract_resume_lines(source_text)
+    clean_text = clean_resume_text(source_text)
+
+    email_match = re.search(EMAIL_PATTERN, source_text)
     name = lines[0] if lines else None
 
     skill_dictionary = build_skill_dictionary()
@@ -269,12 +385,29 @@ def parse_resume(file_bytes: bytes, filename: str) -> Dict:
         "skills": extracted_skills,
         "education": extract_education(lines),
         "certifications": extract_certifications(lines),
-        "phone_numbers": extract_phone_numbers(raw_text),
-        "profile_links": extract_profile_links(raw_text),
+        "phone_numbers": extract_phone_numbers(source_text),
+        "profile_links": extract_profile_links(source_text),
         "lines": lines,
         "source_filename": filename or "",
+        "source_text": source_text,
         "raw_text": clean_text,
     }
+
+
+def process_resume(file_bytes: bytes, filename: str, content_type: str = "") -> Dict:
+    validate_file_type(filename, content_type, file_bytes)
+    profile = parse_resume(file_bytes, filename)
+    validation = validate_resume_content(
+        raw_text=profile.get("source_text", ""),
+        extracted_skills=profile.get("skills", []),
+        filename=filename,
+    )
+
+    if not validation["is_valid"] or not is_resume_profile(profile):
+        raise ValueError("This file does not appear to be a valid resume.")
+
+    profile["resume_score"] = int(validation["score"])
+    return profile
 
 
 def looks_like_person_name(name: str) -> bool:
