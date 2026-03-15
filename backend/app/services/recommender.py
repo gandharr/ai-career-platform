@@ -363,6 +363,35 @@ def hybrid_recommend(
     if not allow_zero_overlap and scored[0]["confidence"] < 0.18:
         return []
 
-    if top_n is None:
-        top_n = 10 if tech_mode else 5
-    return scored[:top_n]
+    best_confidence = scored[0]["confidence"]
+    minimum_confidence = max(0.22, round(best_confidence * 0.60, 3))
+
+    qualified = []
+    for item in scored:
+        method_scores = item["method_scores"]
+        confidence = item["confidence"]
+
+        if confidence < minimum_confidence:
+            continue
+
+        has_skill_evidence = (
+            method_scores.get("collaborative", 0.0) >= 0.20
+            or method_scores.get("core_stack", 0.0) >= 0.20
+            or method_scores.get("tool_project", 0.0) >= 0.18
+        )
+        has_semantic_evidence = (
+            method_scores.get("content", 0.0) >= 0.24
+            or method_scores.get("bert", 0.0) >= 0.20
+        )
+
+        if not (has_skill_evidence or has_semantic_evidence):
+            continue
+
+        qualified.append(item)
+
+    if not qualified:
+        return []
+
+    if top_n is not None:
+        return qualified[:top_n]
+    return qualified
