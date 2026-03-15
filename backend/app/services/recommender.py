@@ -666,16 +666,11 @@ def hybrid_recommend(
         if fuzzy_overlap_ratio < 0.15 and direct_overlap < 0.18 and semantic_score < 0.22:
             continue
 
-        if section_overlap < 0.08 and fuzzy_overlap_ratio < 0.30 and semantic_score < 0.28:
+        if section_overlap < 0.04 and fuzzy_overlap_ratio < 0.20 and semantic_score < 0.20:
             continue
 
-        if dominant_domains and role_domains:
-            domain_intersection = set(dominant_domains) & set(role_domains)
-            if not domain_intersection and fuzzy_overlap_ratio < 0.34 and section_overlap < 0.22:
-                continue
-
         if has_non_stem_degree and role in TECH_ROLE_SUBDOMAIN and not has_strong_tech_cert:
-            if section_overlap < 0.35 and fuzzy_matched_count < 3:
+            if section_overlap < 0.12 and fuzzy_matched_count < 2 and core_signal < 0.15 and tool_signal < 0.15:
                 continue
 
         if tech_mode and role in TECH_ROLE_SUBDOMAIN and core_signal < 0.12 and tool_signal < 0.10 and semantic_score < 0.18:
@@ -746,14 +741,14 @@ def hybrid_recommend(
             method_scores.get("matched_required_count", 0) >= 2
             or method_scores.get("collaborative", 0.0) >= 0.20
             or method_scores.get("matched_required_ratio", 0.0) >= 0.18
-            or method_scores.get("section_overlap", 0.0) >= 0.20
+            or method_scores.get("section_overlap", 0.0) >= 0.10
             or method_scores.get("core_stack", 0.0) >= 0.20
             or method_scores.get("tool_project", 0.0) >= 0.18
         )
         has_strict_semantic_evidence = (
             method_scores.get("content", 0.0) >= 0.24
             or method_scores.get("bert", 0.0) >= 0.20
-            or method_scores.get("domain_alignment", 0.0) >= 0.50
+            or method_scores.get("domain_alignment", 0.0) >= 0.30
         )
 
         if confidence >= strict_minimum_confidence and (has_strict_skill_evidence or has_strict_semantic_evidence):
@@ -764,14 +759,14 @@ def hybrid_recommend(
             method_scores.get("matched_required_count", 0) >= 2
             or method_scores.get("collaborative", 0.0) >= 0.10
             or method_scores.get("matched_required_ratio", 0.0) >= 0.10
-            or method_scores.get("section_overlap", 0.0) >= 0.12
+            or method_scores.get("section_overlap", 0.0) >= 0.06
             or method_scores.get("core_stack", 0.0) >= 0.10
             or method_scores.get("tool_project", 0.0) >= 0.10
         )
         has_related_semantic_evidence = (
             method_scores.get("content", 0.0) >= 0.16
             or method_scores.get("bert", 0.0) >= 0.13
-            or method_scores.get("domain_alignment", 0.0) >= 0.35
+            or method_scores.get("domain_alignment", 0.0) >= 0.20
         )
 
         if confidence >= related_minimum_confidence and has_related_skill_evidence and (
