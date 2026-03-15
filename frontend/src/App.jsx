@@ -89,7 +89,14 @@ function App() {
   }, [])
 
   const chartData = useMemo(
-    () => gapReport.map((item) => ({ skill: item.skill, importance: item.importance * 100 })),
+    () =>
+      [...gapReport]
+        .sort((left, right) => (right.importance || 0) - (left.importance || 0))
+        .slice(0, 8)
+        .map((item) => ({
+          skill: item.skill,
+          importance: Math.max(0, Math.min(100, (item.importance || 0) * 100)),
+        })),
     [gapReport],
   )
 
