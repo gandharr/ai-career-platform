@@ -13,7 +13,7 @@ export function LogoMark({ className = 'h-12 w-12' }) {
 
 export function Tabs({ items, active, onChange }) {
   return (
-    <div className="inline-flex rounded-2xl border border-white/10 bg-slate-950/70 p-1 shadow-inner shadow-black/20">
+    <div className="inline-flex rounded-2xl border border-emerald-200 bg-emerald-50 p-1 shadow-sm shadow-emerald-100">
       {items.map((item) => (
         <button
           key={item.key}
@@ -21,8 +21,8 @@ export function Tabs({ items, active, onChange }) {
           onClick={() => onChange(item.key)}
           className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
             active === item.key
-              ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/20'
-              : 'text-slate-400 hover:text-slate-100'
+              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-300/60'
+              : 'text-slate-700 hover:bg-emerald-100 hover:text-emerald-800'
           }`}
         >
           {item.label}
@@ -37,15 +37,15 @@ export function SectionFrame({ step, title, hint, children }) {
     <section className="panel">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-6 py-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400/10 text-sm font-bold text-cyan-300 ring-1 ring-cyan-400/25">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-sm font-bold text-emerald-700 ring-1 ring-emerald-300/70">
             {step}
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Step {step}</p>
-            <h2 className="text-xl font-semibold text-slate-50">{title}</h2>
+            <h2 className="text-xl font-semibold text-slate-800">{title}</h2>
           </div>
         </div>
-        {hint ? <p className="text-sm text-slate-400">{hint}</p> : null}
+        {hint ? <p className="text-sm text-slate-600">{hint}</p> : null}
       </div>
       <div className="px-6 py-6">{children}</div>
     </section>
@@ -54,9 +54,9 @@ export function SectionFrame({ step, title, hint, children }) {
 
 export function SkillChip({ children, tone = 'default' }) {
   const toneClass = {
-    default: 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200',
-    success: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-200',
-    danger: 'border-rose-400/20 bg-rose-400/10 text-rose-200',
+    default: 'border-emerald-300 bg-emerald-50 text-emerald-800',
+    success: 'border-emerald-300 bg-emerald-100 text-emerald-800',
+    danger: 'border-rose-300 bg-rose-50 text-rose-700',
   }
 
   return <span className={`chip ${toneClass[tone]}`}>{children}</span>
@@ -64,12 +64,12 @@ export function SkillChip({ children, tone = 'default' }) {
 
 export function ProviderBadge({ provider }) {
   const map = {
-    YouTube: 'border-rose-400/25 bg-rose-400/10 text-rose-200',
-    Coursera: 'border-sky-400/25 bg-sky-400/10 text-sky-200',
-    Udemy: 'border-amber-400/25 bg-amber-400/10 text-amber-200',
+    YouTube: 'border-rose-300 bg-rose-50 text-rose-700',
+    Coursera: 'border-emerald-300 bg-emerald-50 text-emerald-800',
+    Udemy: 'border-amber-300 bg-amber-50 text-amber-700',
   }
 
-  return <span className={`chip ${map[provider] || 'border-white/10 bg-white/5 text-slate-200'}`}>{provider}</span>
+  return <span className={`chip ${map[provider] || 'border-slate-300 bg-white text-slate-700'}`}>{provider}</span>
 }
 
 export function Meter({ value, label, accentClass = 'from-cyan-400 to-sky-400' }) {
@@ -80,10 +80,10 @@ export function Meter({ value, label, accentClass = 'from-cyan-400 to-sky-400' }
   return (
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-2 text-sm">
-        <span className="min-w-0 break-words leading-tight text-slate-300">{label}</span>
-        <span className="shrink-0 whitespace-nowrap text-right font-semibold tabular-nums text-slate-100">{displayValue}</span>
+        <span className="min-w-0 break-words leading-tight text-slate-700">{label}</span>
+        <span className="shrink-0 whitespace-nowrap text-right font-semibold tabular-nums text-slate-800">{displayValue}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+      <div className="h-2 overflow-hidden rounded-full bg-emerald-100">
         <div className={`h-full rounded-full bg-gradient-to-r ${accentClass}`} style={{ width }} />
       </div>
     </div>

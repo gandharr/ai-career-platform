@@ -12,7 +12,7 @@ export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegis
           <div className="flex items-center gap-4">
             <LogoMark className="h-14 w-14 rounded-2xl shadow-lg shadow-cyan-500/10" />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80">CareerAI</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">CareerAI</p>
               <h1 className="text-xl font-bold tracking-tight text-slate-50 sm:text-2xl">AI-Powered Career Intelligence Platform</h1>
             </div>
           </div>
@@ -59,7 +59,7 @@ export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegis
               <button
                 type="button"
                 onClick={onGetStarted}
-                className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-cyan-400 to-sky-400 px-6 py-3 text-[15px] font-semibold text-slate-950 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-cyan-500/35 active:scale-95"
+                className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-500 px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-emerald-400/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-95"
               >
                 Get Started
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">

@@ -410,7 +410,7 @@ function App() {
             <div className="flex items-center justify-end gap-3 px-1">
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-800 text-lg text-slate-200 shadow-inner shadow-white/5 transition-all duration-500 ease-out hover:-translate-y-0.5 hover:scale-105 hover:border-cyan-300/45 hover:from-slate-800 hover:to-slate-700 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300 bg-white text-lg text-emerald-800 shadow-sm shadow-emerald-100 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => previousSection && setActiveSection(previousSection)}
                 disabled={!previousSection || loading || backendWarming}
                 aria-label="Previous step"
@@ -420,7 +420,7 @@ function App() {
               </button>
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/35 bg-gradient-to-br from-cyan-400 via-sky-400 to-blue-500 text-lg text-slate-950 shadow-lg shadow-cyan-500/20 transition-all duration-500 ease-out hover:-translate-y-0.5 hover:scale-105 hover:from-cyan-300 hover:via-sky-300 hover:to-blue-400 hover:shadow-xl hover:shadow-cyan-500/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-500/50 bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-lg text-white shadow-lg shadow-emerald-300/35 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:from-emerald-500 hover:via-green-500 hover:to-emerald-700 hover:shadow-xl hover:shadow-emerald-400/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => void onNextStep()}
                 disabled={!nextSection || loading || backendWarming}
                 aria-label="Next step"
