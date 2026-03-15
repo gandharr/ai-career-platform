@@ -367,7 +367,7 @@ function App() {
             <div className="flex items-center justify-end gap-3">
               <button
                 type="button"
-                className="btn btn-ghost h-10 w-10 rounded-full p-0 text-lg"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-gradient-to-br from-slate-900 to-slate-800 text-lg text-slate-200 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-cyan-300/40 hover:from-slate-800 hover:to-slate-700 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => previousSection && setActiveSection(previousSection)}
                 disabled={!previousSection || loading || backendWarming}
                 aria-label="Previous step"
@@ -377,7 +377,7 @@ function App() {
               </button>
               <button
                 type="button"
-                className="btn btn-primary h-10 w-10 rounded-full p-0 text-lg"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/30 bg-gradient-to-br from-cyan-400 to-sky-500 text-lg text-slate-950 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:from-cyan-300 hover:to-sky-400 hover:shadow-lg hover:shadow-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => nextSection && setActiveSection(nextSection)}
                 disabled={!nextSection || loading || backendWarming}
                 aria-label="Next step"
