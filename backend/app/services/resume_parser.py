@@ -8,6 +8,7 @@ from app.data.taxonomy import CAREER_TAXONOMY
 
 
 EMAIL_PATTERN = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
+PHONE_PATTERN = r"(?:\+?\d{1,3}[\s\-]?)?(?:\(?\d{3,4}\)?[\s\-]?)?\d{3}[\s\-]?\d{4}"
 
 BASE_SKILL_DICTIONARY = {
     "python",
@@ -73,6 +74,42 @@ RESUME_SECTION_KEYWORDS = {
     "objective",
     "summary",
     "profile",
+}
+
+CAREER_PROFILE_LINK_HINTS = {
+    "linkedin.com/in/",
+    "github.com/",
+    "portfolio",
+    "behance.net/",
+    "leetcode.com/",
+    "hackerrank.com/",
+}
+
+NON_RESUME_DOCUMENT_KEYWORDS = {
+    "invoice",
+    "receipt",
+    "bank statement",
+    "passbook",
+    "aadhaar",
+    "pan card",
+    "hall ticket",
+    "question paper",
+    "marks memo",
+    "semester result",
+    "time table",
+    "timetable",
+    "assignment",
+    "lab record",
+    "experiment",
+    "project report",
+    "abstract",
+    "table of contents",
+    "chapter 1",
+    "introduction",
+    "conclusion",
+    "certificate of",
+    "bonafide",
+    "fee receipt",
 }
 
 
@@ -143,6 +180,26 @@ def extract_resume_lines(raw_text: str) -> List[str]:
     return [line.strip() for line in (raw_text or "").splitlines() if line and line.strip()]
 
 
+def extract_phone_numbers(raw_text: str) -> List[str]:
+    phone_numbers: List[str] = []
+    seen_digits: Set[str] = set()
+
+    for match in re.finditer(PHONE_PATTERN, raw_text or ""):
+        candidate = match.group(0).strip()
+        digits = "".join(ch for ch in candidate if ch.isdigit())
+        if len(digits) < 10 or len(digits) > 13 or digits in seen_digits:
+            continue
+        seen_digits.add(digits)
+        phone_numbers.append(candidate)
+
+    return phone_numbers[:3]
+
+
+def extract_profile_links(raw_text: str) -> List[str]:
+    lowered = (raw_text or "").lower()
+    return [hint for hint in CAREER_PROFILE_LINK_HINTS if hint in lowered]
+
+
 def extract_education(lines: List[str]) -> List[str]:
     markers = [
         "b.tech",
@@ -158,6 +215,11 @@ def extract_education(lines: List[str]) -> List[str]:
 
 def extract_certifications(lines: List[str]) -> List[str]:
     return [line for line in lines if "cert" in line.lower() or "license" in line.lower()][:8]
+
+
+def count_keyword_hits(text: str, keywords: Set[str]) -> int:
+    normalized_text = (text or "").lower()
+    return sum(1 for keyword in keywords if keyword in normalized_text)
 
 
 def parse_resume(file_bytes: bytes, filename: str) -> Dict:
@@ -177,6 +239,10 @@ def parse_resume(file_bytes: bytes, filename: str) -> Dict:
         "skills": extracted_skills,
         "education": extract_education(lines),
         "certifications": extract_certifications(lines),
+        "phone_numbers": extract_phone_numbers(raw_text),
+        "profile_links": extract_profile_links(raw_text),
+        "lines": lines,
+        "source_filename": filename or "",
         "raw_text": clean_text,
     }
 
@@ -193,18 +259,54 @@ def looks_like_person_name(name: str) -> bool:
 def is_resume_profile(profile: Dict) -> bool:
     clean_text = (profile.get("raw_text") or "").lower()
     name = (profile.get("name") or "").strip()
+    source_filename = (profile.get("source_filename") or "").lower()
     email = (profile.get("email") or "").strip()
+    phone_numbers = profile.get("phone_numbers") or []
+    profile_links = profile.get("profile_links") or []
+    lines = profile.get("lines") or []
     skills_count = len(profile.get("skills") or [])
     has_education = bool(profile.get("education"))
     has_certifications = bool(profile.get("certifications"))
-    section_hits = sum(1 for keyword in RESUME_SECTION_KEYWORDS if keyword in clean_text)
+    section_hits = count_keyword_hits(clean_text, RESUME_SECTION_KEYWORDS)
+    non_resume_hits = count_keyword_hits(clean_text, NON_RESUME_DOCUMENT_KEYWORDS)
+    filename_non_resume_hits = count_keyword_hits(source_filename, NON_RESUME_DOCUMENT_KEYWORDS)
+    contact_points = int(bool(email)) + int(bool(phone_numbers)) + int(bool(profile_links))
 
-    has_identity_signals = looks_like_person_name(name) and bool(email)
-    has_resume_sections = section_hits >= 2
+    has_identity_signals = looks_like_person_name(name) and contact_points >= 1
+    has_resume_sections = len(lines) >= 6 and section_hits >= 2
     has_skill_depth = skills_count >= 2
-    has_supporting_content = has_education or has_certifications
+    has_supporting_content = has_education or has_certifications or "project" in clean_text or "experience" in clean_text
+    likely_non_resume_document = (non_resume_hits + filename_non_resume_hits) >= 2 and section_hits <= 1
+
+    score = 0
+    if looks_like_person_name(name):
+        score += 2
+    if email:
+        score += 2
+    if phone_numbers:
+        score += 1
+    if profile_links:
+        score += 1
+    if len(lines) >= 8:
+        score += 1
+    if section_hits >= 2:
+        score += 2
+    if section_hits >= 3:
+        score += 1
+    if skills_count >= 3:
+        score += 2
+    elif skills_count >= 1:
+        score += 1
+    if has_education:
+        score += 1
+    if has_certifications:
+        score += 1
+    score -= min(4, non_resume_hits + filename_non_resume_hits)
 
     return (
-        (has_identity_signals and has_resume_sections and (has_skill_depth or has_supporting_content))
-        or (bool(email) and section_hits >= 3 and has_skill_depth and has_supporting_content)
+        not likely_non_resume_document
+        and has_identity_signals
+        and has_resume_sections
+        and (has_skill_depth or has_supporting_content)
+        and score >= 6
     )
