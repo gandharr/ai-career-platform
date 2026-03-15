@@ -72,9 +72,9 @@ export function HeroHeader({ isAuthenticated, onLogout }) {
 export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveSection, dashboardItems }) {
   if (isAuthenticated) {
     return (
-      <section className="panel relative z-20 mb-5 px-2 py-2">
+      <section className="relative z-20 mb-5">
         <div className="overflow-x-auto">
-          <div className="flex min-w-max items-center gap-2 rounded-xl border border-white/10 bg-slate-950/85 px-2 py-2">
+          <div className="flex min-w-max items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/85 px-3 py-2">
           {dashboardItems.map((item) => (
             <button
               key={item.key}
@@ -97,7 +97,7 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
   }
 
   return (
-    <section className="panel px-6 py-6">
+    <section className="rounded-2xl border border-white/10 bg-slate-950/70 px-6 py-4">
       <p className="text-sm text-slate-300">Please sign in or create an account to access the platform.</p>
     </section>
   )
