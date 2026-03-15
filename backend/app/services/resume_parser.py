@@ -1,6 +1,6 @@
 import re
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Set
 
 import pdfplumber
 from docx import Document
@@ -9,118 +9,164 @@ from app.data.taxonomy import CAREER_TAXONOMY
 
 
 EMAIL_PATTERN = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+"
-SKILL_SECTION_HINTS = ("skill", "tools", "technology", "competenc", "expertise", "core")
-NOISE_WORDS = {
+
+BASE_SKILL_DICTIONARY = {
+    "python",
+    "java",
+    "javascript",
+    "html",
+    "css",
+    "react",
+    "node.js",
+    "machine learning",
+    "deep learning",
+    "nlp",
+    "data analysis",
+    "statistics",
+    "sql",
+    "pharmacology",
+    "chemistry",
+    "drug safety",
+    "clinical research",
+    "marketing",
+    "digital marketing",
+    "graphic design",
+    "illustrator",
+    "adobe photoshop",
+    "figma",
+    "accounting",
+    "financial modeling",
+    "autocad",
+    "project management",
+    "communication",
+}
+
+SKILL_SYNONYMS = {
+    "js": "javascript",
+    "reactjs": "react",
+    "nodejs": "node.js",
+    "ml": "machine learning",
+    "ai": "machine learning",
+    "py": "python",
+    "powerbi": "power bi",
+    "photoshop": "adobe photoshop",
+}
+
+NOISE_TOKENS = {
     "curriculum vitae",
     "resume",
     "professional summary",
     "objective",
-    "experience",
-    "work experience",
-    "education",
-    "project",
-    "projects",
-    "responsibilities",
-    "achievements",
-    "languages",
-    "hobbies",
+    "declaration",
     "references",
 }
 
-TAXONOMY_SKILLS_SORTED = sorted(
-    {skill.strip().lower() for role in CAREER_TAXONOMY.values() for skill in role.get("skills", []) if skill and skill.strip()},
-    key=len,
-    reverse=True,
-)
+
+def build_skill_dictionary() -> Set[str]:
+    taxonomy_skills = {
+        skill.strip().lower()
+        for role in CAREER_TAXONOMY.values()
+        for skill in role.get("skills", [])
+        if isinstance(skill, str) and skill.strip()
+    }
+    return taxonomy_skills.union(BASE_SKILL_DICTIONARY)
 
 
-def _extract_taxonomy_skills(text: str) -> List[str]:
-    normalized_text = re.sub(r"\s+", " ", text.lower())
-    matched: List[str] = []
+def extract_text_from_pdf(file_bytes: bytes) -> str:
+    pages: List[str] = []
+    with pdfplumber.open(BytesIO(file_bytes)) as pdf:
+        for page in pdf.pages:
+            page_text = page.extract_text() or ""
+            if not page_text.strip():
+                words = page.extract_words() or []
+                page_text = " ".join(word.get("text", "") for word in words if word.get("text"))
+            pages.append(page_text)
+    return "\n".join(pages)
 
-    for skill in TAXONOMY_SKILLS_SORTED:
+
+def extract_text_from_docx(file_bytes: bytes) -> str:
+    doc = Document(BytesIO(file_bytes))
+    paragraphs = [para.text for para in doc.paragraphs if para.text and para.text.strip()]
+    return "\n".join(paragraphs)
+
+
+def extract_resume_text(file_bytes: bytes, filename: str) -> str:
+    lower_name = (filename or "").lower()
+
+    if lower_name.endswith(".pdf"):
+        return extract_text_from_pdf(file_bytes)
+    if lower_name.endswith(".docx"):
+        return extract_text_from_docx(file_bytes)
+
+    return file_bytes.decode("utf-8-sig", errors="ignore")
+
+
+def clean_resume_text(text: str) -> str:
+    cleaned = (text or "").replace("\ufeff", " ")
+    cleaned = cleaned.lower()
+    cleaned = re.sub(r"[^a-z0-9+.#/&\-\s]", " ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
+def extract_skills_from_text(clean_text: str, skill_dictionary: Set[str]) -> List[str]:
+    if not clean_text:
+        return []
+
+    expanded_dict = set(skill_dictionary)
+    expanded_dict.update(SKILL_SYNONYMS.keys())
+
+    matches: Set[str] = set()
+    for skill in sorted(expanded_dict, key=len, reverse=True):
         compact = "".join(ch for ch in skill if ch.isalnum())
         if len(compact) <= 1:
             continue
         pattern = rf"(?<![a-z0-9]){re.escape(skill)}(?![a-z0-9])"
-        if re.search(pattern, normalized_text):
-            matched.append(skill)
+        if re.search(pattern, clean_text):
+            canonical_skill = SKILL_SYNONYMS.get(skill, skill)
+            if canonical_skill not in NOISE_TOKENS:
+                matches.add(canonical_skill)
 
-    return sorted(set(matched))
-
-
-def _extract_freeform_skills(text: str) -> List[str]:
-    lines = [line.strip().lower() for line in text.splitlines() if line.strip()]
-    candidates: List[str] = []
-
-    for line in lines:
-        lowered = line.lower()
-        if any(hint in lowered for hint in SKILL_SECTION_HINTS):
-            chunk = lowered.split(":", 1)[1] if ":" in lowered else lowered
-            candidates.extend(re.split(r"[,|•;/]", chunk))
-
-    if not candidates:
-        return []
-
-    cleaned: List[str] = []
-    for item in candidates:
-        token = re.sub(r"[^a-z0-9+.#\-\s]", " ", item)
-        token = re.sub(r"\s+", " ", token).strip(" .:-")
-        if not token:
-            continue
-        if token in NOISE_WORDS:
-            continue
-        if token.isdigit() or len(token) < 2 or len(token) > 48:
-            continue
-        if len(token.split()) > 4:
-            continue
-        cleaned.append(token)
-
-    return sorted(set(cleaned))
+    return sorted(matches)
 
 
-def _extract_text_from_pdf(file_bytes: bytes) -> str:
-    text_parts: List[str] = []
-    with pdfplumber.open(BytesIO(file_bytes)) as pdf:
-        for page in pdf.pages:
-            text_parts.append(page.extract_text() or "")
-    return "\n".join(text_parts)
+def extract_resume_lines(raw_text: str) -> List[str]:
+    return [line.strip() for line in (raw_text or "").splitlines() if line and line.strip()]
 
 
-def _extract_text_from_docx(file_bytes: bytes) -> str:
-    document = Document(BytesIO(file_bytes))
-    return "\n".join([para.text for para in document.paragraphs if para.text])
+def extract_education(lines: List[str]) -> List[str]:
+    markers = [
+        "b.tech",
+        "bachelor",
+        "master",
+        "university",
+        "pharm",
+        "mba",
+        "degree",
+    ]
+    return [line for line in lines if any(marker in line.lower() for marker in markers)][:5]
+
+
+def extract_certifications(lines: List[str]) -> List[str]:
+    return [line for line in lines if "cert" in line.lower() or "license" in line.lower()][:8]
 
 
 def parse_resume(file_bytes: bytes, filename: str) -> Dict:
-    file_name_lower = filename.lower()
-    if file_name_lower.endswith(".pdf"):
-        text = _extract_text_from_pdf(file_bytes)
-    elif file_name_lower.endswith(".docx"):
-        text = _extract_text_from_docx(file_bytes)
-    else:
-        text = file_bytes.decode("utf-8-sig", errors="ignore")
+    raw_text = extract_resume_text(file_bytes, filename)
+    lines = extract_resume_lines(raw_text)
+    clean_text = clean_resume_text(raw_text)
 
-    text = text.lstrip("\ufeff")
-
-    lines = [line.strip().lstrip("\ufeff") for line in text.splitlines() if line.strip()]
-
+    email_match = re.search(EMAIL_PATTERN, raw_text)
     name = lines[0] if lines else None
-    email_match = re.search(EMAIL_PATTERN, text)
-    email = email_match.group(0) if email_match else None
 
-    taxonomy_skills = _extract_taxonomy_skills(text)
-    freeform_skills = _extract_freeform_skills(text)
-    found_skills = sorted(set(taxonomy_skills + freeform_skills))
-
-    education = [line for line in lines if any(k in line.lower() for k in ["b.tech", "bachelor", "master", "university"])][:3]
-    certifications = [line for line in lines if "cert" in line.lower()][:5]
+    skill_dictionary = build_skill_dictionary()
+    extracted_skills = extract_skills_from_text(clean_text, skill_dictionary)
 
     return {
         "name": name,
-        "email": email,
-        "skills": found_skills,
-        "education": education,
-        "certifications": certifications,
-        "raw_text": text,
+        "email": email_match.group(0) if email_match else None,
+        "skills": extracted_skills,
+        "education": extract_education(lines),
+        "certifications": extract_certifications(lines),
+        "raw_text": clean_text,
     }

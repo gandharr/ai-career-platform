@@ -23,6 +23,8 @@ class UserProfileIn(BaseModel):
 class CareerRecommendation(BaseModel):
     role: str
     confidence: float
+    matching_score: Optional[float] = None
+    matched_skills: List[str] = Field(default_factory=list)
     reason: str
     method_scores: Dict[str, float] = Field(default_factory=dict)
 

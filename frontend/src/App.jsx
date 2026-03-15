@@ -39,8 +39,8 @@ function App() {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [authTab, setAuthTab] = useState('login')
-  const [inputTab, setInputTab] = useState('manual')
-  const [activeSection, setActiveSection] = useState('dashboard')
+  const [inputTab, setInputTab] = useState('upload')
+  const [activeSection, setActiveSection] = useState(token ? 'input' : 'auth')
   const flashTimeoutRef = useRef(0)
 
   useEffect(() => {
@@ -55,7 +55,7 @@ function App() {
 
   useEffect(() => {
     if (!token) {
-      setActiveSection('dashboard')
+      setActiveSection('auth')
     }
   }, [token])
 
@@ -147,8 +147,8 @@ function App() {
       setRecommendations(rec.recommendations)
       setExplainability(rec.explainability || {})
       setSelectedRole(rec.recommendations[0]?.role || '')
-      setActiveSection('recommendations')
-      showMessage('Resume parsed and recommendations generated.')
+      setActiveSection('profile')
+      showMessage('Resume parsed. Candidate profile is ready.')
     } catch (requestError) {
       setError(getRequestErrorMessage(requestError, 'Failed to parse the resume and generate recommendations.'))
     } finally {
@@ -184,8 +184,8 @@ function App() {
       setRecommendations(rec.recommendations)
       setExplainability(rec.explainability || {})
       setSelectedRole(rec.recommendations[0]?.role || '')
-      setActiveSection('recommendations')
-      showMessage('Recommendations generated from manual skills.')
+      setActiveSection('profile')
+      showMessage('Profile generated from skills. Continue to recommendations.')
     } catch (requestError) {
       setError(getRequestErrorMessage(requestError, 'Failed to generate recommendations from manual skills.'))
     } finally {
@@ -213,7 +213,7 @@ function App() {
       localStorage.setItem('career_token', accessToken)
       setAuthToken(accessToken)
       setToken(accessToken)
-      setActiveSection('dashboard')
+      setActiveSection('input')
       showMessage('Account created successfully.')
     } catch (requestError) {
       setError(getRequestErrorMessage(requestError, 'Registration failed.'))
@@ -243,7 +243,7 @@ function App() {
       setAuthToken(accessToken)
       setToken(accessToken)
 
-      setActiveSection('dashboard')
+      setActiveSection('input')
       showMessage('Signed in successfully.')
     } catch (requestError) {
       setError(getRequestErrorMessage(requestError, 'Login failed.'))
@@ -267,7 +267,7 @@ function App() {
     setManualSkills('')
     setAuth({ name: '', email: '', password: '' })
     setError('')
-    setActiveSection('dashboard')
+    setActiveSection('auth')
     showMessage('Signed out.')
   }
 
@@ -345,9 +345,9 @@ function App() {
   }
 
   const isAuthenticated = Boolean((token || '').trim())
-  const showHeroHeader = activeSection === 'dashboard'
-  const orderedSectionKeys = ['dashboard', 'input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
-  const navigableSections = isAuthenticated ? orderedSectionKeys : ['dashboard', 'auth']
+  const showHeroHeader = true
+  const orderedSectionKeys = ['input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
+  const navigableSections = isAuthenticated ? orderedSectionKeys : ['auth']
   const currentStepIndex = navigableSections.indexOf(activeSection)
   const previousSection = currentStepIndex > 0 ? navigableSections[currentStepIndex - 1] : null
   const nextSection =
@@ -408,7 +408,7 @@ function App() {
             onLogout={onLogout}
             onOpenLogin={onOpenLogin}
             onOpenRegister={onOpenRegister}
-            onGetStarted={() => setActiveSection('input')}
+            onGetStarted={() => setActiveSection(isAuthenticated ? 'input' : 'auth')}
           />
         ) : null}
 

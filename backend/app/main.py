@@ -128,6 +128,7 @@ def recommend_careers(payload: UserProfileIn, db: Session = Depends(get_db)):
         experience_years=payload.experience_years,
         certifications=payload.certifications,
         resume_text=sanitized_resume_text,
+        top_n=10,
         allow_zero_overlap=not bool(normalized_skills),
     )
     if not recommendations:
