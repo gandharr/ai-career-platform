@@ -440,31 +440,37 @@ export function ExplainabilitySection({ isAuthenticated, activeSection, recommen
   )
 }
 
-export function GapSection({ isAuthenticated, activeSection, gapReport, chartData }) {
+export function GapSection({ isAuthenticated, activeSection, gapReport }) {
   if (!(isAuthenticated && activeSection === 'gap' && gapReport.length > 0)) {
     return null
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-      <SectionFrame step="06" title="Missing skills" hint="Priority gaps for the role you selected.">
-        <div className="space-y-4">
-          {gapReport.map((item) => (
-            <div key={item.skill} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-              <Meter value={item.importance} label={item.skill} accentClass="from-rose-400 to-amber-400" />
-            </div>
-          ))}
-        </div>
-      </SectionFrame>
+    <SectionFrame step="06" title="Missing skills" hint="Priority gaps for the role you selected.">
+      <div className="space-y-4">
+        {gapReport.map((item) => (
+          <div key={item.skill} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+            <Meter value={item.importance} label={item.skill} accentClass="from-rose-400 to-amber-400" />
+          </div>
+        ))}
+      </div>
+    </SectionFrame>
+  )
+}
 
-      <SectionFrame step="07" title="Skill radar" hint="A quick visual read of missing-skill importance.">
-        <div className="h-80">
-          <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">Loading chart...</div>}>
-            <GapRadarChart chartData={chartData} />
-          </Suspense>
-        </div>
-      </SectionFrame>
-    </div>
+export function SkillRadarSection({ isAuthenticated, activeSection, gapReport, chartData }) {
+  if (!(isAuthenticated && activeSection === 'radar' && gapReport.length > 0)) {
+    return null
+  }
+
+  return (
+    <SectionFrame step="07" title="Skill radar" hint="A quick visual read of missing-skill importance.">
+      <div className="h-80">
+        <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">Loading chart...</div>}>
+          <GapRadarChart chartData={chartData} />
+        </Suspense>
+      </div>
+    </SectionFrame>
   )
 }
 

@@ -19,6 +19,7 @@ import {
   LearningSection,
   ProfileSection,
   RecommendationsSection,
+  SkillRadarSection,
 } from './components/sections'
 
 function App() {
@@ -357,7 +358,7 @@ function App() {
 
   const isAuthenticated = Boolean((token || '').trim())
   const showHeroHeader = true
-  const orderedSectionKeys = ['input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
+  const orderedSectionKeys = ['input', 'profile', 'recommendations', 'explainability', 'gap', 'radar', 'learning']
   const navigableSections = isAuthenticated ? orderedSectionKeys : ['dashboard']
   const currentStepIndex = navigableSections.indexOf(activeSection)
   const previousSection = currentStepIndex > 0 ? navigableSections[currentStepIndex - 1] : null
@@ -377,6 +378,19 @@ function App() {
         return
       }
       await onAnalyzeGap()
+      return
+    }
+
+    if (nextSection === 'radar') {
+      if (!profile || !selectedRole) {
+        setError('Select a recommended role first to continue to skill-gap analysis.')
+        return
+      }
+      if (gapReport.length === 0) {
+        await onAnalyzeGap()
+        return
+      }
+      setActiveSection('radar')
       return
     }
 
@@ -497,7 +511,9 @@ function App() {
             explainability={explainability}
           />
 
-          <GapSection isAuthenticated={isAuthenticated} activeSection={activeSection} gapReport={gapReport} chartData={chartData} />
+          <GapSection isAuthenticated={isAuthenticated} activeSection={activeSection} gapReport={gapReport} />
+
+          <SkillRadarSection isAuthenticated={isAuthenticated} activeSection={activeSection} gapReport={gapReport} chartData={chartData} />
 
           <LearningSection isAuthenticated={isAuthenticated} activeSection={activeSection} resources={resources} />
         </main>
