@@ -338,6 +338,35 @@ function App() {
       ? navigableSections[currentStepIndex + 1]
       : null
 
+  const onNextStep = async () => {
+    if (!nextSection) {
+      return
+    }
+
+    if (nextSection === 'gap' && gapReport.length === 0) {
+      if (!profile || !selectedRole) {
+        setError('Select a recommended role first to continue to skill-gap analysis.')
+        return
+      }
+      await onAnalyzeGap()
+      return
+    }
+
+    if (nextSection === 'learning' && resources.length === 0) {
+      if (!profile || !selectedRole) {
+        setError('Select a recommended role first to continue to learning resources.')
+        return
+      }
+      if (gapReport.length === 0) {
+        await onAnalyzeGap()
+      }
+      setActiveSection('learning')
+      return
+    }
+
+    setActiveSection(nextSection)
+  }
+
   return (
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
@@ -379,7 +408,7 @@ function App() {
               <button
                 type="button"
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/35 bg-gradient-to-br from-cyan-400 via-sky-400 to-blue-500 text-lg text-slate-950 shadow-lg shadow-cyan-500/20 transition-all duration-500 ease-out hover:-translate-y-0.5 hover:scale-105 hover:from-cyan-300 hover:via-sky-300 hover:to-blue-400 hover:shadow-xl hover:shadow-cyan-500/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
-                onClick={() => nextSection && setActiveSection(nextSection)}
+                onClick={() => void onNextStep()}
                 disabled={!nextSection || loading || backendWarming}
                 aria-label="Next step"
                 title="Next"
