@@ -376,6 +376,13 @@ function App() {
   return (
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
+        <DashboardSectionNav
+          isAuthenticated={isAuthenticated}
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          dashboardItems={dashboardItems}
+        />
+
         <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} />
 
         <main className="mt-8 space-y-6">
@@ -389,13 +396,6 @@ function App() {
               </div>
             </div>
           ) : null}
-
-          <DashboardSectionNav
-            isAuthenticated={isAuthenticated}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            dashboardItems={dashboardItems}
-          />
 
           {loading ? (
             <div className="panel px-6 py-10">
