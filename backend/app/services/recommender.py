@@ -132,13 +132,25 @@ def _matched_required_skills(user_skills: List[str], required_skills: List[str],
     if not user_skills:
         return []
 
+    def is_short_or_symbol_skill(skill: str) -> bool:
+        compact = "".join(ch for ch in skill.lower() if ch.isalnum())
+        return len(compact) < 3
+
+    fuzzy_pool = [skill for skill in user_skills if not is_short_or_symbol_skill(skill)]
+
     matched: List[str] = []
     for required in required_skills:
         if required in user_skills:
             matched.append(required)
             continue
 
-        fuzzy_match = process.extractOne(required, user_skills, scorer=fuzz.token_set_ratio, score_cutoff=threshold)
+        if is_short_or_symbol_skill(required):
+            continue
+
+        if not fuzzy_pool:
+            continue
+
+        fuzzy_match = process.extractOne(required, fuzzy_pool, scorer=fuzz.token_set_ratio, score_cutoff=threshold)
         if fuzzy_match:
             matched.append(required)
 
@@ -326,6 +338,9 @@ def hybrid_recommend(
             continue
 
         if fuzzy_matched_count < 2 and fuzzy_overlap_ratio < 0.22:
+            continue
+
+        if role in TECH_ROLE_SUBDOMAIN and not tech_mode and matched_count < 2:
             continue
 
         if not allow_zero_overlap and matched_count == 0 and (direct_overlap < 0.22 or semantic_score < 0.20):
