@@ -378,8 +378,8 @@ def hybrid_recommend(
     best_confidence = scored[0]["confidence"]
     strict_minimum_confidence = max(0.22, round(best_confidence * 0.60, 3))
     related_minimum_confidence = max(0.12, round(best_confidence * 0.30, 3))
-    target_count = 5 if tech_mode else 4
-    max_count = 7 if tech_mode else 6
+    target_count = 5
+    max_count = 7
 
     qualified = []
     related_candidates = []
@@ -387,9 +387,6 @@ def hybrid_recommend(
         method_scores = item["method_scores"]
         confidence = item["confidence"]
         role = item["role"]
-
-        if tech_mode and role not in TECH_ROLE_SUBDOMAIN and method_scores.get("matched_required_ratio", 0.0) < 0.30:
-            continue
 
         has_strict_skill_evidence = (
             method_scores.get("collaborative", 0.0) >= 0.20
