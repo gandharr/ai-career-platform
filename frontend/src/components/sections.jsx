@@ -71,11 +71,27 @@ export function HeroHeader({ isAuthenticated, onLogout }) {
 
 export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveSection, dashboardItems }) {
   if (isAuthenticated) {
+    const compactKeys = new Set(['auth', 'input', 'recommendations'])
+    const compactItems = dashboardItems.filter((item) => compactKeys.has(item.key))
+    const overflowItems = dashboardItems.filter((item) => !compactKeys.has(item.key))
+    const overflowActiveValue = overflowItems.some((item) => item.key === activeSection) ? activeSection : ''
+
     return (
       <section className="relative z-20 mb-5">
         <div className="overflow-x-auto">
           <div className="flex min-w-max items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/85 px-3 py-2">
-          {dashboardItems.map((item) => (
+          <button
+            type="button"
+            onClick={() => setActiveSection('dashboard')}
+            className={`rounded-lg px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+              activeSection === 'dashboard'
+                ? 'bg-cyan-400/15 text-cyan-200'
+                : 'text-slate-300 hover:bg-white/5 hover:text-slate-100'
+            }`}
+          >
+            Dashboard
+          </button>
+          {compactItems.map((item) => (
             <button
               key={item.key}
               type="button"
@@ -90,6 +106,22 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
               {item.label}
             </button>
           ))}
+          {overflowItems.length > 0 ? (
+            <div className="ml-1 min-w-[190px]">
+              <select
+                className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-300 outline-none transition focus:border-cyan-400/40"
+                value={overflowActiveValue}
+                onChange={(event) => setActiveSection(event.target.value)}
+              >
+                <option value="" disabled>More sections</option>
+                {overflowItems.map((item) => (
+                  <option key={item.key} value={item.key} disabled={!item.enabled}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
           </div>
         </div>
       </section>
