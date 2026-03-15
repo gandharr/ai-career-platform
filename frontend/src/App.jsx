@@ -328,6 +328,7 @@ function App() {
   }
 
   const isAuthenticated = Boolean((token || '').trim())
+  const showHeroHeader = isAuthenticated && activeSection === 'dashboard'
   const dashboardItems = [
     {
       key: 'auth',
@@ -376,16 +377,18 @@ function App() {
   return (
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
-        <DashboardSectionNav
-          isAuthenticated={isAuthenticated}
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          dashboardItems={dashboardItems}
-        />
+        {isAuthenticated ? (
+          <DashboardSectionNav
+            isAuthenticated={isAuthenticated}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            dashboardItems={dashboardItems}
+          />
+        ) : null}
 
-        <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} />
+        {showHeroHeader ? <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} /> : null}
 
-        <main className="mt-8 space-y-6">
+        <main className={`${showHeroHeader ? 'mt-8' : 'mt-2'} space-y-6`}>
           {successMsg ? <div className="notice success">{successMsg}</div> : null}
           {error ? <div className="notice error">{error}</div> : null}
           {backendWarming ? (
