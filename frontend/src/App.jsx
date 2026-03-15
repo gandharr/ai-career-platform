@@ -106,6 +106,15 @@ function App() {
     flashTimeoutRef.current = window.setTimeout(() => setSuccessMsg(''), 3200)
   }
 
+  const scrollToAuthSection = () => {
+    window.setTimeout(() => {
+      const authAnchor = document.getElementById('auth-section-anchor')
+      if (authAnchor) {
+        authAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 40)
+  }
+
   const getRequestErrorMessage = (requestError, fallback) => {
     const detail = requestError?.response?.data?.detail
     if (typeof detail === 'string' && detail.trim()) {
@@ -274,11 +283,13 @@ function App() {
   const onOpenLogin = () => {
     setAuthTab('login')
     setActiveSection('auth')
+    scrollToAuthSection()
   }
 
   const onOpenRegister = () => {
     setAuthTab('register')
     setActiveSection('auth')
+    scrollToAuthSection()
   }
 
   const onAnalyzeGap = async () => {
@@ -408,13 +419,6 @@ function App() {
             onLogout={onLogout}
             onOpenLogin={onOpenLogin}
             onOpenRegister={onOpenRegister}
-            onGetStarted={() => {
-              if (isAuthenticated) {
-                setActiveSection('input')
-                return
-              }
-              setError('Please click Login to continue.')
-            }}
           />
         ) : null}
 
@@ -444,17 +448,19 @@ function App() {
             </div>
           ) : null}
 
-          <AuthSection
-            activeSection={activeSection}
-            isAuthenticated={isAuthenticated}
-            authTab={authTab}
-            setAuthTab={setAuthTab}
-            auth={auth}
-            setAuth={setAuth}
-            onLogin={onLogin}
-            onRegister={onRegister}
-            loading={loading}
-          />
+          <div id="auth-section-anchor">
+            <AuthSection
+              activeSection={activeSection}
+              isAuthenticated={isAuthenticated}
+              authTab={authTab}
+              setAuthTab={setAuthTab}
+              auth={auth}
+              setAuth={setAuth}
+              onLogin={onLogin}
+              onRegister={onRegister}
+              loading={loading}
+            />
+          </div>
 
           <InputSection
             isAuthenticated={isAuthenticated}

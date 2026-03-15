@@ -3,7 +3,7 @@ import { LogoMark, Meter, ProviderBadge, SectionFrame, SkillChip, Tabs, formatPe
 
 const GapRadarChart = lazy(() => import('./GapRadarChart'))
 
-export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegister, onGetStarted }) {
+export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegister }) {
   return (
     <header className="panel overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(74,222,128,0.14),transparent_24%)]" />
@@ -54,27 +54,13 @@ export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegis
             <span className="mini-stat">Explainable scores</span>
             <span className="mini-stat">Learning links</span>
           </div>
-          {isAuthenticated ? (
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={onGetStarted}
-                className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-500 px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-emerald-400/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-95"
-              >
-                Get Started
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-                  <path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          ) : null}
         </div>
 
         <div className="grid items-stretch gap-4 sm:grid-cols-3 lg:grid-cols-1">
           <div className="metric-card">
-            <p className="metric-label">Role quality filter</p>
-            <p className="metric-value">Strict</p>
-            <p className="metric-note">Only evidence-backed role matches are shown from your skills and resume.</p>
+            <p className="metric-label">Recommendation logic</p>
+            <p className="metric-value">Deterministic</p>
+            <p className="metric-note">Skill-grounded matching with transparent top-10 career ranking.</p>
           </div>
           <div className="metric-card">
             <p className="metric-label">Learning support</p>
