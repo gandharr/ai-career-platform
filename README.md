@@ -24,6 +24,7 @@ An internship-ready full-stack platform that gives **deterministic**, skill-grou
 
 ## ✨ Key Highlights
 - Resume parsing for `.pdf`, `.docx`, `.txt`
+- Resume/CV-only upload enforcement (non-resume documents are rejected)
 - NLP-style dictionary-based skill extraction
 - Deterministic ranking (no random suggestions)
 - Top **10** recommendations with matched skills and score
