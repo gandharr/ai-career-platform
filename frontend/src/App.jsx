@@ -55,7 +55,7 @@ function App() {
 
   useEffect(() => {
     if (!token) {
-      setActiveSection('auth')
+      setActiveSection('dashboard')
     }
   }, [token])
 
@@ -259,7 +259,7 @@ function App() {
     setManualSkills('')
     setAuth({ name: '', email: '', password: '' })
     setError('')
-    setActiveSection('auth')
+    setActiveSection('dashboard')
     showMessage('Signed out.')
   }
 
@@ -328,8 +328,8 @@ function App() {
 
   const isAuthenticated = Boolean((token || '').trim())
   const showHeroHeader = isAuthenticated && activeSection === 'dashboard'
-  const orderedSectionKeys = ['dashboard', 'auth', 'input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
-  const navigableSections = isAuthenticated ? orderedSectionKeys : ['auth']
+  const orderedSectionKeys = ['dashboard', 'input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
+  const navigableSections = isAuthenticated ? orderedSectionKeys : []
   const currentStepIndex = navigableSections.indexOf(activeSection)
   const previousSection = currentStepIndex > 0 ? navigableSections[currentStepIndex - 1] : null
   const nextSection =
@@ -363,8 +363,8 @@ function App() {
             </div>
           ) : null}
 
-          <div className="panel px-4 py-3">
-            <div className="flex items-center justify-end gap-3">
+          {isAuthenticated ? (
+            <div className="flex items-center justify-end gap-3 px-1">
               <button
                 type="button"
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-gradient-to-br from-slate-900 to-slate-800 text-lg text-slate-200 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-cyan-300/40 hover:from-slate-800 hover:to-slate-700 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
@@ -386,7 +386,7 @@ function App() {
                 →
               </button>
             </div>
-          </div>
+          ) : null}
 
           <AuthSection
             activeSection={activeSection}
