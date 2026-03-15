@@ -118,12 +118,14 @@ def recommend_careers(payload: UserProfileIn, db: Session = Depends(get_db)):
             ),
         )
 
+    sanitized_resume_text = (payload.resume_text or "")[:8000]
+
     recommendations = hybrid_recommend(
         payload.user_id,
         skills_for_recommendation,
         experience_years=payload.experience_years,
         certifications=payload.certifications,
-        resume_text=payload.resume_text,
+        resume_text=sanitized_resume_text,
         allow_zero_overlap=not bool(normalized_skills),
     )
     if not recommendations:

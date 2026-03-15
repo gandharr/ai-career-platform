@@ -105,6 +105,20 @@ function App() {
     flashTimeoutRef.current = window.setTimeout(() => setSuccessMsg(''), 3200)
   }
 
+  const getRequestErrorMessage = (requestError, fallback) => {
+    const detail = requestError?.response?.data?.detail
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail
+    }
+    if (Array.isArray(detail) && detail.length > 0) {
+      return detail.map((item) => item?.msg || JSON.stringify(item)).join('; ')
+    }
+    if (typeof requestError?.message === 'string' && requestError.message.trim()) {
+      return requestError.message
+    }
+    return fallback
+  }
+
   const onUploadResume = async () => {
     if (!resumeFile) return
 
@@ -120,7 +134,7 @@ function App() {
         skills: parsed.skills,
         experience_years: 0,
         certifications: parsed.certifications || [],
-        resume_text: parsed.raw_text || '',
+        resume_text: (parsed.raw_text || '').slice(0, 8000),
       })
 
       setRecommendations(rec.recommendations)
@@ -129,7 +143,7 @@ function App() {
       setActiveSection('recommendations')
       showMessage('Resume parsed and recommendations generated.')
     } catch (requestError) {
-      setError(requestError?.response?.data?.detail || 'Failed to parse the resume and generate recommendations.')
+      setError(getRequestErrorMessage(requestError, 'Failed to parse the resume and generate recommendations.'))
     } finally {
       setLoading(false)
     }
@@ -160,7 +174,7 @@ function App() {
       setActiveSection('recommendations')
       showMessage('Recommendations generated from manual skills.')
     } catch (requestError) {
-      setError(requestError?.response?.data?.detail || 'Failed to generate recommendations from manual skills.')
+      setError(getRequestErrorMessage(requestError, 'Failed to generate recommendations from manual skills.'))
     } finally {
       setLoading(false)
     }
@@ -182,7 +196,7 @@ function App() {
       setActiveSection('dashboard')
       showMessage('Account created successfully.')
     } catch (requestError) {
-      setError(requestError?.response?.data?.detail || 'Registration failed.')
+      setError(getRequestErrorMessage(requestError, 'Registration failed.'))
     } finally {
       setLoading(false)
     }
@@ -205,7 +219,7 @@ function App() {
       setActiveSection('dashboard')
       showMessage('Signed in successfully.')
     } catch (requestError) {
-      setError(requestError?.response?.data?.detail || 'Login failed.')
+      setError(getRequestErrorMessage(requestError, 'Login failed.'))
     } finally {
       setLoading(false)
     }
@@ -250,7 +264,7 @@ function App() {
       setActiveSection('gap')
       showMessage(`Skill gap ready for ${selectedRole}.`)
     } catch (requestError) {
-      setError(requestError?.response?.data?.detail || 'Failed to analyze the skill gap.')
+      setError(getRequestErrorMessage(requestError, 'Failed to analyze the skill gap.'))
     } finally {
       setLoading(false)
     }

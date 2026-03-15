@@ -28,7 +28,7 @@ const resolvedApiBaseUrl = resolveApiBaseUrl()
 
 const api = axios.create({
   baseURL: resolvedApiBaseUrl,
-  timeout: 12000,
+  timeout: 20000,
 })
 
 api.interceptors.response.use(
@@ -91,12 +91,18 @@ export const loginUser = async (payload) => {
 export const parseResume = async (file) => {
   const formData = new FormData()
   formData.append('file', file)
-  const { data } = await api.post('/parse-resume', formData)
+  const { data } = await requestWithRetry(
+    () => api.post('/parse-resume', formData, { timeout: 60000 }),
+    1,
+  )
   return data
 }
 
 export const recommendCareers = async (payload) => {
-  const { data } = await api.post('/recommend-careers', payload)
+  const { data } = await requestWithRetry(
+    () => api.post('/recommend-careers', payload, { timeout: 45000 }),
+    1,
+  )
   return data
 }
 
