@@ -340,18 +340,13 @@ export function RecommendationsSection({ isAuthenticated, activeSection, recomme
             const matched = Array.isArray(xai.matched) ? xai.matched : []
             const missing = Array.isArray(xai.missing) ? xai.missing : []
             const requiredCount = matched.length + missing.length
-            const matchedPreview = matched.slice(0, 3)
-            const hiddenMatchedCount = Math.max(0, matched.length - matchedPreview.length)
             const missingPreview = missing.slice(0, 2)
 
             let computedReason = item.reason
             if (requiredCount > 0) {
               computedReason = `Matched ${matched.length}/${requiredCount} required skills`
-              if (matchedPreview.length > 0) {
-                computedReason += `: ${matchedPreview.join(', ')}`
-                if (hiddenMatchedCount > 0) {
-                  computedReason += ` (+${hiddenMatchedCount} more)`
-                }
+              if (matched.length > 0) {
+                computedReason += `: ${matched.join(', ')}`
               }
               if (missingPreview.length > 0) {
                 computedReason += `. Must-have missing: ${missingPreview.join(', ')}`
