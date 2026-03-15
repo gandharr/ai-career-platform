@@ -1,11 +1,18 @@
 # AI Career Recommendation Platform
 
-An internship-ready, full-stack platform that parses resumes and recommends the **best-fit careers based strictly on detected skills**.
+> Parse resume → extract skills → rank careers → explain match → close skill gaps.
 
-## Live Links
-- Frontend: [https://gandharr.github.io/ai-career-platform/](https://gandharr.github.io/ai-career-platform/)
-- Backend Health: [https://ai-career-platform-api.onrender.com/health](https://ai-career-platform-api.onrender.com/health)
-- Swagger Docs: [https://ai-career-platform-api.onrender.com/docs](https://ai-career-platform-api.onrender.com/docs)
+[![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://gandharr.github.io/ai-career-platform/)
+[![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://ai-career-platform-api.onrender.com/docs)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+An internship-ready full-stack platform that gives **deterministic**, skill-grounded career recommendations from uploaded resumes.
+
+## Live Demo
+- 🌐 Frontend: [https://gandharr.github.io/ai-career-platform/](https://gandharr.github.io/ai-career-platform/)
+- ✅ Backend Health: [https://ai-career-platform-api.onrender.com/health](https://ai-career-platform-api.onrender.com/health)
+- 📘 Swagger: [https://ai-career-platform-api.onrender.com/docs](https://ai-career-platform-api.onrender.com/docs)
 
 ## Screenshots
 
@@ -15,84 +22,84 @@ An internship-ready, full-stack platform that parses resumes and recommends the 
 ### API Docs
 ![CareerAI API Docs](https://raw.githubusercontent.com/gandharr/ai-career-platform/main/docs/screenshots/api-docs.png)
 
-## Why this project stands out
-- Multi-format resume parsing (`.pdf`, `.docx`, `.txt`)
-- NLP-style dictionary-based skill extraction from real resume text
-- Deterministic career scoring using:
-  - required-skill overlap
-  - cosine similarity on skill sets
-- Top **10** role recommendations with:
-  - role name
-  - matching score
-  - matched skills
-- Explainability + skill-gap analysis + learning resources
-- End-to-end flow with auth, profile view, recommendations, and PDF report
+## ✨ Key Highlights
+- Resume parsing for `.pdf`, `.docx`, `.txt`
+- NLP-style dictionary-based skill extraction
+- Deterministic ranking (no random suggestions)
+- Top **10** recommendations with matched skills and score
+- Explainability + skill-gap + learning path
+- Clean flow: **Login → Upload → Profile → Recommendations → Gap → Learning**
 
-## End-to-end user flow
-1. **Login / Register**
-2. **Upload Resume** (or manual skill input)
-3. **Candidate Profile** (parsed skills + identity)
-4. **Career Recommendations** (Top 10)
-5. **Explainability** (matched/missing evidence)
-6. **Skill Gap + Learning Path**
-
-## Recommendation Architecture (Current)
+## Recommendation Pipeline
 
 ### 1) Resume Text Extraction
 - Extract text from PDF, DOCX, TXT
-- Normalize text: lowercase, remove special symbols, normalize whitespace
+- Normalize to lowercase, clean symbols, normalize whitespace
 
 ### 2) Skill Extraction
-- Build combined skill dictionary from:
-  - career taxonomy (`backend/app/data/taxonomy.py`)
-  - core domain skill set
+- Build dictionary from taxonomy + domain skill seeds
 - Detect exact and synonym-mapped skills from cleaned text
 
-### 3) Career-Skill Dataset
-- Uses structured role-to-skills mapping from taxonomy
-- Supports cross-domain careers: CS, Business, Arts, Pharmacy, etc.
+### 3) Career–Skill Mapping Dataset
+- Structured role-to-skills mapping in `backend/app/data/taxonomy.py`
+- Covers CS, Business, Arts, Pharmacy, and more
 
 ### 4) Career Matching Algorithm
 For each role:
 - `matched = user_skills ∩ role_required_skills`
 - `match_ratio = |matched| / |required|`
 - `cosine = |matched| / sqrt(|user| * |required|)`
-- `score = 0.65 * cosine + 0.35 * match_ratio`
+- `final_score = 0.65 * cosine + 0.35 * match_ratio`
 
-### 5) Ranking & Output
-- Sort by score (desc), then matched count
-- Return top **10** recommendations with deterministic order
+### 5) Output
+- Sort by score (descending)
+- Return top **10** careers with deterministic order
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[Resume Upload] --> B[Resume Parser]
+    B --> C[Clean Text]
+    C --> D[Skill Extractor]
+    D --> E[Skill Normalizer]
+    E --> F[Career-Skill Taxonomy]
+    F --> G[Deterministic Matcher]
+    G --> H[Top 10 Recommendations]
+    H --> I[Explainability + Skill Gap + Learning Path]
+```
 
 ## Tech Stack
-- **Frontend:** React, Vite, Tailwind CSS, Recharts, jsPDF
-- **Backend:** FastAPI, SQLAlchemy, RapidFuzz, pdfplumber, python-docx
-- **Databases:**
-  - PostgreSQL (users + logs)
-  - MongoDB (history/events)
-- **Auth:** JWT Bearer tokens
-- **Deployment:** GitHub Pages (frontend) + Render (backend)
+
+| Layer | Tools |
+|---|---|
+| Frontend | React, Vite, Tailwind CSS, Recharts, jsPDF |
+| Backend | FastAPI, SQLAlchemy, RapidFuzz, pdfplumber, python-docx |
+| Data | PostgreSQL, MongoDB |
+| Auth | JWT Bearer |
+| Deployment | GitHub Pages + Render |
 
 ## Project Structure
-- `frontend/` → UI, auth, charts, PDF export
-- `backend/app/main.py` → API routing and orchestration
+- `frontend/` → dashboard UI, auth, charts, PDF export
+- `backend/app/main.py` → API routes/orchestration
 - `backend/app/services/resume_parser.py` → text + skill extraction
-- `backend/app/services/recommender.py` → deterministic ranking logic
+- `backend/app/services/recommender.py` → deterministic recommendation logic
 - `backend/app/services/xai.py` → matched/missing explanation
 - `backend/app/services/skill_gap.py` → missing-skill priority report
-- `backend/app/data/taxonomy.py` → career-skill mapping dataset
+- `backend/app/data/taxonomy.py` → role-skill mapping dataset
 
-## Run Locally
+## Quick Start
 
-### Option A: Docker (recommended)
+### Docker (Recommended)
 ```bash
 cd ai-career-platform
 docker compose up --build
 ```
 
-- Frontend: http://localhost:5173
-- Backend Docs: http://localhost:8000/docs
+- Frontend: `http://localhost:5173`
+- Backend docs: `http://localhost:8000/docs`
 
-### Option B: Manual setup
+### Manual Setup
 
 #### Backend
 ```bash
@@ -115,7 +122,7 @@ npm run dev
 - `POST /recommend-careers`
 - `POST /skill-gap`
 - `POST /learning-path`
-- `GET /user/profile` (protected)
+- `GET /user/profile` *(protected)*
 
 ## Environment Variables
 
@@ -129,20 +136,15 @@ npm run dev
 ### Frontend
 - `VITE_API_URL`
 
-## Demo Scripts (Windows PowerShell)
+## Demo Scripts (PowerShell)
 
-### One-click demo
 ```powershell
 ./scripts/demo.ps1
-```
-
-### Cleanup
-```powershell
 ./scripts/cleanup.ps1
 ```
 
-## Academic / Viva Talking Points
-- Problem: generic and misleading career suggestions across domains
-- Fix: deterministic skill-grounded recommender with modular architecture
-- Outcome: domain-consistent recommendations for CS, Arts, Pharmacy, Business resumes
-- Added reliability: clear user flow, explainability, and top-10 ranked results
+## Viva / Presentation Talking Points
+- **Problem:** generic cross-domain mismatches in recommendations
+- **Fix:** deterministic, skill-grounded ranking pipeline
+- **Result:** reliable domain-aligned output for CS, Arts, Pharmacy, Business resumes
+- **Value:** explainable recommendations with actionable learning path
