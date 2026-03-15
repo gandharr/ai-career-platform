@@ -76,6 +76,24 @@ RESUME_SECTION_KEYWORDS = {
     "profile",
 }
 
+CORE_RESUME_SECTION_KEYWORDS = {
+    "education",
+    "experience",
+    "work experience",
+    "employment",
+    "skills",
+    "technical skills",
+    "projects",
+    "internship",
+    "internships",
+}
+
+RESUME_TITLE_HINTS = {
+    "resume",
+    "curriculum vitae",
+    "cv",
+}
+
 CAREER_PROFILE_LINK_HINTS = {
     "linkedin.com/in/",
     "github.com/",
@@ -99,6 +117,18 @@ NON_RESUME_DOCUMENT_KEYWORDS = {
     "time table",
     "timetable",
     "assignment",
+    "charter",
+    "project charter",
+    "scope",
+    "deliverables",
+    "stakeholders",
+    "milestone",
+    "milestones",
+    "assumptions",
+    "constraints",
+    "risk register",
+    "issue log",
+    "approval",
     "lab record",
     "experiment",
     "project report",
@@ -264,22 +294,37 @@ def is_resume_profile(profile: Dict) -> bool:
     phone_numbers = profile.get("phone_numbers") or []
     profile_links = profile.get("profile_links") or []
     lines = profile.get("lines") or []
+    top_lines_text = " ".join(line.strip().lower() for line in lines[:5])
     skills_count = len(profile.get("skills") or [])
     has_education = bool(profile.get("education"))
     has_certifications = bool(profile.get("certifications"))
     section_hits = count_keyword_hits(clean_text, RESUME_SECTION_KEYWORDS)
+    core_section_hits = count_keyword_hits(clean_text, CORE_RESUME_SECTION_KEYWORDS)
     non_resume_hits = count_keyword_hits(clean_text, NON_RESUME_DOCUMENT_KEYWORDS)
     filename_non_resume_hits = count_keyword_hits(source_filename, NON_RESUME_DOCUMENT_KEYWORDS)
+    header_non_resume_hits = count_keyword_hits(top_lines_text, NON_RESUME_DOCUMENT_KEYWORDS)
+    title_resume_hits = count_keyword_hits(top_lines_text, RESUME_TITLE_HINTS)
     contact_points = int(bool(email)) + int(bool(phone_numbers)) + int(bool(profile_links))
+    has_contact_in_header = (
+        bool(email and email.lower() in top_lines_text)
+        or any(phone.lower() in top_lines_text for phone in phone_numbers)
+        or any(link in top_lines_text for link in profile_links)
+    )
 
     has_identity_signals = looks_like_person_name(name) and contact_points >= 1
-    has_resume_sections = len(lines) >= 6 and section_hits >= 2
+    has_resume_sections = len(lines) >= 6 and core_section_hits >= 2
     has_skill_depth = skills_count >= 2
-    has_supporting_content = has_education or has_certifications or "project" in clean_text or "experience" in clean_text
-    likely_non_resume_document = (non_resume_hits + filename_non_resume_hits) >= 2 and section_hits <= 1
+    has_supporting_content = has_education or has_certifications or core_section_hits >= 3
+    likely_non_resume_document = (
+        header_non_resume_hits >= 1
+        or ((non_resume_hits + filename_non_resume_hits) >= 2 and section_hits <= 1)
+        or (title_resume_hits == 0 and header_non_resume_hits >= 1)
+    )
 
     score = 0
     if looks_like_person_name(name):
+        score += 2
+    if has_contact_in_header:
         score += 2
     if email:
         score += 2
@@ -289,9 +334,9 @@ def is_resume_profile(profile: Dict) -> bool:
         score += 1
     if len(lines) >= 8:
         score += 1
-    if section_hits >= 2:
+    if core_section_hits >= 2:
         score += 2
-    if section_hits >= 3:
+    if core_section_hits >= 3:
         score += 1
     if skills_count >= 3:
         score += 2
@@ -306,7 +351,8 @@ def is_resume_profile(profile: Dict) -> bool:
     return (
         not likely_non_resume_document
         and has_identity_signals
+        and has_contact_in_header
         and has_resume_sections
         and (has_skill_depth or has_supporting_content)
-        and score >= 6
+        and score >= 7
     )
