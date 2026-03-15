@@ -12,7 +12,6 @@ import {
 import { formatPercentValue } from './components/ui'
 import {
   AuthSection,
-  DashboardSectionNav,
   ExplainabilitySection,
   GapSection,
   HeroHeader,
@@ -330,63 +329,7 @@ function App() {
   const isAuthenticated = Boolean((token || '').trim())
   const showHeroHeader = isAuthenticated && activeSection === 'dashboard'
   const orderedSectionKeys = ['dashboard', 'auth', 'input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
-  const dashboardItems = [
-    {
-      key: 'auth',
-      label: 'Authentication',
-      hint: 'Sign in or create account',
-      enabled: true,
-    },
-    {
-      key: 'input',
-      label: 'Skills Input',
-      hint: 'Manual entry or resume upload',
-      enabled: isAuthenticated,
-    },
-    {
-      key: 'profile',
-      label: 'Candidate Profile',
-      hint: 'Extracted name, email, and skills',
-      enabled: isAuthenticated && Boolean(profile),
-    },
-    {
-      key: 'recommendations',
-      label: 'Recommendations',
-      hint: 'Ranked role matches',
-      enabled: isAuthenticated && recommendations.length > 0,
-    },
-    {
-      key: 'explainability',
-      label: 'Explainability',
-      hint: 'Matched and missing skills',
-      enabled: isAuthenticated && recommendations.length > 0,
-    },
-    {
-      key: 'gap',
-      label: 'Gap & Radar',
-      hint: 'Missing skills and importance graph',
-      enabled: isAuthenticated && gapReport.length > 0,
-    },
-    {
-      key: 'learning',
-      label: 'Learning Path',
-      hint: 'Recommended courses/resources',
-      enabled: isAuthenticated && resources.length > 0,
-    },
-  ]
-
-  const isSectionEnabled = (key) => {
-    if (key === 'auth') {
-      return true
-    }
-    if (key === 'dashboard') {
-      return isAuthenticated
-    }
-    const item = dashboardItems.find((entry) => entry.key === key)
-    return Boolean(item?.enabled)
-  }
-
-  const navigableSections = orderedSectionKeys.filter((key) => isSectionEnabled(key))
+  const navigableSections = isAuthenticated ? orderedSectionKeys : ['auth']
   const currentStepIndex = navigableSections.indexOf(activeSection)
   const previousSection = currentStepIndex > 0 ? navigableSections[currentStepIndex - 1] : null
   const nextSection =
@@ -398,15 +341,6 @@ function App() {
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
         {showHeroHeader ? <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} /> : null}
-
-        {isAuthenticated ? (
-          <DashboardSectionNav
-            isAuthenticated={isAuthenticated}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            dashboardItems={dashboardItems}
-          />
-        ) : null}
 
         <main className={`${showHeroHeader ? 'mt-8' : 'mt-2'} space-y-6`}>
           {successMsg ? <div className="notice success">{successMsg}</div> : null}
@@ -433,22 +367,26 @@ function App() {
             <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost h-10 w-10 rounded-full p-0 text-lg"
                 onClick={() => previousSection && setActiveSection(previousSection)}
                 disabled={!previousSection || loading || backendWarming}
+                aria-label="Previous step"
+                title="Previous"
               >
-                ← Previous
+                ←
               </button>
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 Step {Math.max(1, currentStepIndex + 1)} / {Math.max(1, navigableSections.length)}
               </span>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-primary h-10 w-10 rounded-full p-0 text-lg"
                 onClick={() => nextSection && setActiveSection(nextSection)}
                 disabled={!nextSection || loading || backendWarming}
+                aria-label="Next step"
+                title="Next"
               >
-                Next →
+                →
               </button>
             </div>
           </div>
