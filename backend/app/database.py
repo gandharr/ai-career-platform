@@ -28,11 +28,20 @@ def build_mongo_client() -> MongoClient:
     return MongoClient(settings.mongo_url, **client_options)
 
 
-mongo_client = build_mongo_client()
-mongo_db = mongo_client[settings.mongo_db_name]
+mongo_init_error = None
+
+try:
+    mongo_client = build_mongo_client()
+    mongo_db = mongo_client[settings.mongo_db_name]
+except Exception as exc:
+    mongo_client = None
+    mongo_db = None
+    mongo_init_error = str(exc)
 
 
 def check_mongo_health() -> bool:
+    if mongo_client is None:
+        return False
     try:
         mongo_client.admin.command("ping")
         return True
@@ -41,6 +50,8 @@ def check_mongo_health() -> bool:
 
 
 def get_mongo_health_details() -> dict:
+    if mongo_client is None:
+        return {"status": "down", "detail": mongo_init_error or "Mongo client is not configured."}
     try:
         mongo_client.admin.command("ping")
         return {"status": "up"}
