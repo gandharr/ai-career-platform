@@ -6,7 +6,7 @@ const GapRadarChart = lazy(() => import('./GapRadarChart'))
 export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegister, onGetStarted }) {
   return (
     <header className="panel overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.14),transparent_28%),radial-gradient(circle_at_top_right,rgba(244,114,182,0.12),transparent_24%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(74,222,128,0.14),transparent_24%)]" />
       <div className="relative border-b border-white/10 px-6 py-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">

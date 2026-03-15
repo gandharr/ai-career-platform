@@ -44,9 +44,9 @@ function App() {
   const flashTimeoutRef = useRef(0)
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark')
-    document.body.classList.remove('theme-light')
-    localStorage.setItem('career_theme', 'dark')
+    document.documentElement.setAttribute('data-theme', 'light')
+    document.body.classList.add('theme-light')
+    localStorage.setItem('career_theme', 'light')
   }, [])
 
   useEffect(() => {
