@@ -410,7 +410,7 @@ function App() {
             </div>
           ) : null}
 
-          {navigableSections.length > 1 ? (
+          {isAuthenticated && activeSection !== 'dashboard' && navigableSections.length > 1 ? (
             <div className="flex items-center justify-end gap-3 px-1">
               <button
                 type="button"
