@@ -669,6 +669,17 @@ def hybrid_recommend(
         if section_overlap < 0.04 and fuzzy_overlap_ratio < 0.20 and semantic_score < 0.20:
             continue
 
+        if "engineering_core" in role_domains:
+            has_engineering_evidence = (
+                fuzzy_matched_count >= 3
+                or fuzzy_overlap_ratio >= 0.30
+                or core_signal >= 0.25
+                or tool_signal >= 0.25
+                or section_overlap >= 0.15
+            )
+            if not has_engineering_evidence:
+                continue
+
         if has_non_stem_degree and role in TECH_ROLE_SUBDOMAIN and not has_strong_tech_cert:
             if section_overlap < 0.12 and fuzzy_matched_count < 2 and core_signal < 0.15 and tool_signal < 0.15:
                 continue
