@@ -329,6 +329,7 @@ function App() {
 
   const isAuthenticated = Boolean((token || '').trim())
   const showHeroHeader = isAuthenticated && activeSection === 'dashboard'
+  const orderedSectionKeys = ['dashboard', 'auth', 'input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
   const dashboardItems = [
     {
       key: 'auth',
@@ -374,9 +375,30 @@ function App() {
     },
   ]
 
+  const isSectionEnabled = (key) => {
+    if (key === 'auth') {
+      return true
+    }
+    if (key === 'dashboard') {
+      return isAuthenticated
+    }
+    const item = dashboardItems.find((entry) => entry.key === key)
+    return Boolean(item?.enabled)
+  }
+
+  const navigableSections = orderedSectionKeys.filter((key) => isSectionEnabled(key))
+  const currentStepIndex = navigableSections.indexOf(activeSection)
+  const previousSection = currentStepIndex > 0 ? navigableSections[currentStepIndex - 1] : null
+  const nextSection =
+    currentStepIndex >= 0 && currentStepIndex < navigableSections.length - 1
+      ? navigableSections[currentStepIndex + 1]
+      : null
+
   return (
     <div className="app-shell">
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-6 lg:px-8">
+        {showHeroHeader ? <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} /> : null}
+
         {isAuthenticated ? (
           <DashboardSectionNav
             isAuthenticated={isAuthenticated}
@@ -385,8 +407,6 @@ function App() {
             dashboardItems={dashboardItems}
           />
         ) : null}
-
-        {showHeroHeader ? <HeroHeader isAuthenticated={isAuthenticated} onLogout={onLogout} /> : null}
 
         <main className={`${showHeroHeader ? 'mt-8' : 'mt-2'} space-y-6`}>
           {successMsg ? <div className="notice success">{successMsg}</div> : null}
@@ -408,6 +428,30 @@ function App() {
               </div>
             </div>
           ) : null}
+
+          <div className="panel px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => previousSection && setActiveSection(previousSection)}
+                disabled={!previousSection || loading || backendWarming}
+              >
+                ← Previous
+              </button>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Step {Math.max(1, currentStepIndex + 1)} / {Math.max(1, navigableSections.length)}
+              </span>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => nextSection && setActiveSection(nextSection)}
+                disabled={!nextSection || loading || backendWarming}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
 
           <AuthSection
             activeSection={activeSection}
