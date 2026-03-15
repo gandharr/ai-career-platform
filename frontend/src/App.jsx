@@ -401,6 +401,7 @@ function App() {
             onLogout={onLogout}
             onOpenLogin={onOpenLogin}
             onOpenRegister={onOpenRegister}
+            onGetStarted={() => setActiveSection('input')}
           />
         ) : null}
 
