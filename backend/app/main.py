@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.config import settings
 from app.data.taxonomy import CAREER_TAXONOMY
-from app.database import Base, check_mongo_health, check_postgres_health, engine, get_db, mongo_db
+from app.database import Base, check_postgres_health, engine, get_db, get_mongo_health_details, mongo_db
 from app.deps import get_current_user
 from app.models import User
 from app.schemas import (
@@ -65,10 +65,12 @@ def startup_event():
 
 @app.get("/health")
 def health():
+    mongo_health = get_mongo_health_details()
     return {
         "status": "ok",
         "postgres": "up" if check_postgres_health() else "down",
-        "mongo": "up" if check_mongo_health() else "down",
+        "mongo": mongo_health["status"],
+        "mongo_detail": mongo_health.get("detail"),
     }
 
 

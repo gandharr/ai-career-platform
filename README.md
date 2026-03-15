@@ -134,6 +134,12 @@ npm run dev
 - `SECRET_KEY`
 - `CORS_ORIGINS`
 
+Production notes:
+- Local Docker uses `mongodb://mongo:27017`.
+- Render production should use your hosted MongoDB connection string in `MONGO_URL`, typically `mongodb+srv://...` from MongoDB Atlas.
+- The backend now uses `certifi` CA certificates for hosted TLS/SRV Mongo connections.
+- If `/health` shows `mongo: down`, check `mongo_detail` in the same response to see the actual connection error.
+
 ### Frontend
 - `VITE_API_URL`
 
