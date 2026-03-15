@@ -8,7 +8,9 @@ export function formatPercentValue(value) {
 }
 
 export function LogoMark({ className = 'h-12 w-12' }) {
-  return <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="CareerAI logo" className={className} />
+  const baseUrl = import.meta.env.BASE_URL || '/'
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+  return <img src={`${normalizedBaseUrl}logo.svg`} alt="CareerAI logo" className={className} />
 }
 
 export function Tabs({ items, active, onChange }) {
