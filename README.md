@@ -1,48 +1,89 @@
 # AI Career Recommendation Platform
 
-Production-ready AI career guidance platform that parses resumes, recommends role matches, explains ranking logic, and generates targeted upskilling paths.
+An internship-ready, full-stack platform that parses resumes and recommends the **best-fit careers based strictly on detected skills**.
 
 ## Live Links
 - Frontend: [https://gandharr.github.io/ai-career-platform/](https://gandharr.github.io/ai-career-platform/)
 - Backend Health: [https://ai-career-platform-api.onrender.com/health](https://ai-career-platform-api.onrender.com/health)
-- API Docs (Swagger): [https://ai-career-platform-api.onrender.com/docs](https://ai-career-platform-api.onrender.com/docs)
+- Swagger Docs: [https://ai-career-platform-api.onrender.com/docs](https://ai-career-platform-api.onrender.com/docs)
 
 ## Screenshots
 
-### Dashboard (GitHub Pages)
+### Dashboard
 ![CareerAI Dashboard](https://raw.githubusercontent.com/gandharr/ai-career-platform/main/docs/screenshots/dashboard-home.png)
 
-### Backend API Docs (Render)
+### API Docs
 ![CareerAI API Docs](https://raw.githubusercontent.com/gandharr/ai-career-platform/main/docs/screenshots/api-docs.png)
 
-## Core Features
-- Resume parsing for `.pdf`, `.docx`, `.txt`
-- Taxonomy-wide skill extraction and normalization (tech + non-tech)
-- Hybrid recommendation engine (content + overlap + semantic)
-- Explainability per role (matched/missing skills + method scores)
-- Skill-gap analysis with learning resource suggestions
-- JWT authentication (register/login) with protected user profile routes
-- Account-gated dashboard experience
-- PDF export of recommendation results
+## Why this project stands out
+- Multi-format resume parsing (`.pdf`, `.docx`, `.txt`)
+- NLP-style dictionary-based skill extraction from real resume text
+- Deterministic career scoring using:
+  - required-skill overlap
+  - cosine similarity on skill sets
+- Top **10** role recommendations with:
+  - role name
+  - matching score
+  - matched skills
+- Explainability + skill-gap analysis + learning resources
+- End-to-end flow with auth, profile view, recommendations, and PDF report
+
+## End-to-end user flow
+1. **Login / Register**
+2. **Upload Resume** (or manual skill input)
+3. **Candidate Profile** (parsed skills + identity)
+4. **Career Recommendations** (Top 10)
+5. **Explainability** (matched/missing evidence)
+6. **Skill Gap + Learning Path**
+
+## Recommendation Architecture (Current)
+
+### 1) Resume Text Extraction
+- Extract text from PDF, DOCX, TXT
+- Normalize text: lowercase, remove special symbols, normalize whitespace
+
+### 2) Skill Extraction
+- Build combined skill dictionary from:
+  - career taxonomy (`backend/app/data/taxonomy.py`)
+  - core domain skill set
+- Detect exact and synonym-mapped skills from cleaned text
+
+### 3) Career-Skill Dataset
+- Uses structured role-to-skills mapping from taxonomy
+- Supports cross-domain careers: CS, Business, Arts, Pharmacy, etc.
+
+### 4) Career Matching Algorithm
+For each role:
+- `matched = user_skills ∩ role_required_skills`
+- `match_ratio = |matched| / |required|`
+- `cosine = |matched| / sqrt(|user| * |required|)`
+- `score = 0.65 * cosine + 0.35 * match_ratio`
+
+### 5) Ranking & Output
+- Sort by score (desc), then matched count
+- Return top **10** recommendations with deterministic order
 
 ## Tech Stack
-- Frontend: React, Tailwind CSS, Recharts, jsPDF
-- Backend: FastAPI, scikit-learn, RapidFuzz, SQLAlchemy
-- Databases:
-  - PostgreSQL (Neon): users + recommendation logs
-  - MongoDB (Atlas): recommendation history events
-- Auth: JWT bearer token flow
-- CI/CD: GitHub Actions (CI + GitHub Pages deploy)
-- Local runtime: Docker Compose
+- **Frontend:** React, Vite, Tailwind CSS, Recharts, jsPDF
+- **Backend:** FastAPI, SQLAlchemy, RapidFuzz, pdfplumber, python-docx
+- **Databases:**
+  - PostgreSQL (users + logs)
+  - MongoDB (history/events)
+- **Auth:** JWT Bearer tokens
+- **Deployment:** GitHub Pages (frontend) + Render (backend)
 
-## Architecture
-- `frontend/`: Dashboard UI, auth flow, charts, PDF export
-- `backend/app/main.py`: API routes + orchestration layer
-- `backend/app/services/`: resume parser, recommender, skill gap, XAI, resources
-- `backend/app/models.py`: SQLAlchemy models (`users`, `recommendation_logs`)
-- `backend/app/data/taxonomy.py`: career-role skill taxonomy
+## Project Structure
+- `frontend/` → UI, auth, charts, PDF export
+- `backend/app/main.py` → API routing and orchestration
+- `backend/app/services/resume_parser.py` → text + skill extraction
+- `backend/app/services/recommender.py` → deterministic ranking logic
+- `backend/app/services/xai.py` → matched/missing explanation
+- `backend/app/services/skill_gap.py` → missing-skill priority report
+- `backend/app/data/taxonomy.py` → career-skill mapping dataset
 
-## Run Locally with Docker (Recommended)
+## Run Locally
+
+### Option A: Docker (recommended)
 ```bash
 cd ai-career-platform
 docker compose up --build
@@ -51,39 +92,20 @@ docker compose up --build
 - Frontend: http://localhost:5173
 - Backend Docs: http://localhost:8000/docs
 
-## Run Locally without Docker
+### Option B: Manual setup
 
-### Backend
+#### Backend
 ```bash
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-### Frontend
+#### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
-```
-
-## Demo Scripts (Windows PowerShell)
-
-### One-click demo
-```powershell
-./scripts/demo.ps1
-```
-
-This command:
-1. Builds and starts containers
-2. Waits for health checks
-3. Seeds demo data
-4. Runs smoke tests
-5. Opens frontend and API docs
-
-### Cleanup/reset
-```powershell
-./scripts/cleanup.ps1
 ```
 
 ## API Endpoints
@@ -93,22 +115,34 @@ This command:
 - `POST /recommend-careers`
 - `POST /skill-gap`
 - `POST /learning-path`
-- `GET /user/profile` (requires bearer token)
+- `GET /user/profile` (protected)
 
-## Deployment Model
+## Environment Variables
 
-GitHub Pages hosts only static frontend assets. Full production uses:
-- Frontend: GitHub Pages
-- Backend: Render
-- PostgreSQL: Neon
-- MongoDB: Atlas
+### Backend
+- `POSTGRES_URL`
+- `MONGO_URL`
+- `MONGO_DB_NAME`
+- `SECRET_KEY`
+- `CORS_ORIGINS`
 
-Required environment variables:
-- Backend: `POSTGRES_URL`, `MONGO_URL`, `MONGO_DB_NAME`, `SECRET_KEY`, `CORS_ORIGINS`
-- Frontend: `VITE_API_URL`
+### Frontend
+- `VITE_API_URL`
 
-## Recommendation Formula (Presentation-friendly)
+## Demo Scripts (Windows PowerShell)
 
-`final = 0.55 * content + 0.30 * overlap + 0.15 * semantic`
+### One-click demo
+```powershell
+./scripts/demo.ps1
+```
 
-Recommendations are returned only when domain-aligned skill overlap is meaningful, to avoid false-positive role suggestions.
+### Cleanup
+```powershell
+./scripts/cleanup.ps1
+```
+
+## Academic / Viva Talking Points
+- Problem: generic and misleading career suggestions across domains
+- Fix: deterministic skill-grounded recommender with modular architecture
+- Outcome: domain-consistent recommendations for CS, Arts, Pharmacy, Business resumes
+- Added reliability: clear user flow, explainability, and top-10 ranked results
