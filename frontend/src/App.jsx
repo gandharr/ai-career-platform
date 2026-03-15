@@ -37,6 +37,9 @@ function App() {
   const [token, setToken] = useState(sessionStorage.getItem('career_token') || '')
   const [profileHistory, setProfileHistory] = useState([])
   const [loading, setLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState('Processing your request...')
+  const [backendReady, setBackendReady] = useState(false)
+  const [backendWarming, setBackendWarming] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [authTab, setAuthTab] = useState('login')
@@ -90,8 +93,25 @@ function App() {
     return () => window.clearTimeout(timerId)
   }, [])
 
+  const ensureBackendReady = async () => {
+    if (backendReady) {
+      return true
+    }
+
+    setBackendWarming(true)
+    const ok = await warmUpBackend()
+    setBackendWarming(false)
+    setBackendReady(ok)
+
+    if (!ok) {
+      setError('Backend is waking up. Please wait a few seconds and try again.')
+      return false
+    }
+    return true
+  }
+
   useEffect(() => {
-    void warmUpBackend()
+    void ensureBackendReady()
   }, [])
 
   const chartData = useMemo(
@@ -123,8 +143,14 @@ function App() {
     if (!resumeFile) return
 
     setError('')
+    setLoadingMessage('Waking backend and parsing resume...')
     setLoading(true)
     try {
+      const ready = await ensureBackendReady()
+      if (!ready) {
+        return
+      }
+
       const parsed = await parseResume(resumeFile)
       setProfile(parsed)
 
@@ -151,8 +177,14 @@ function App() {
 
   const onManualRecommend = async () => {
     setError('')
+    setLoadingMessage('Waking backend and generating recommendations...')
     setLoading(true)
     try {
+      const ready = await ensureBackendReady()
+      if (!ready) {
+        return
+      }
+
       const skills = manualSkills
         .split(',')
         .map((item) => item.trim())
@@ -182,8 +214,14 @@ function App() {
 
   const onRegister = async () => {
     setError('')
+    setLoadingMessage('Connecting to backend...')
     setLoading(true)
     try {
+      const ready = await ensureBackendReady()
+      if (!ready) {
+        return
+      }
+
       const data = await registerUser(auth)
       const accessToken = (data?.access_token || '').trim()
       if (!accessToken) {
@@ -204,8 +242,14 @@ function App() {
 
   const onLogin = async () => {
     setError('')
+    setLoadingMessage('Connecting to backend...')
     setLoading(true)
     try {
+      const ready = await ensureBackendReady()
+      if (!ready) {
+        return
+      }
+
       const data = await loginUser({ email: auth.email, password: auth.password })
       const accessToken = (data?.access_token || '').trim()
       if (!accessToken) {
@@ -252,8 +296,14 @@ function App() {
     if (!profile || !selectedRole) return
 
     setError('')
+    setLoadingMessage('Analyzing your skill gap...')
     setLoading(true)
     try {
+      const ready = await ensureBackendReady()
+      if (!ready) {
+        return
+      }
+
       const gap = await getSkillGap({ user_skills: profile.skills, target_role: selectedRole })
       setGapReport(gap.missing_skills)
 
@@ -365,6 +415,14 @@ function App() {
         <main className="mt-8 space-y-6">
           {successMsg ? <div className="notice success">{successMsg}</div> : null}
           {error ? <div className="notice error">{error}</div> : null}
+          {backendWarming ? (
+            <div className="panel px-6 py-4">
+              <div className="flex items-center gap-3 text-slate-300">
+                <div className="spinner" />
+                <span>Waking backend server for faster responses...</span>
+              </div>
+            </div>
+          ) : null}
 
           <DashboardSectionNav
             isAuthenticated={isAuthenticated}
@@ -377,7 +435,7 @@ function App() {
             <div className="panel px-6 py-10">
               <div className="flex items-center justify-center gap-3 text-slate-300">
                 <div className="spinner" />
-                <span>Processing your request...</span>
+                <span>{loadingMessage}</span>
               </div>
             </div>
           ) : null}

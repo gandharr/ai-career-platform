@@ -123,7 +123,9 @@ export const getUserProfile = async () => {
 
 export const warmUpBackend = async () => {
   try {
-    await api.get('/health', { timeout: 5000 })
+    await requestWithRetry(() => api.get('/health', { timeout: 12000 }), 1)
+    return true
   } catch {
+    return false
   }
 }
