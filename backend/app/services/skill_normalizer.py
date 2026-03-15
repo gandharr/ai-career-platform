@@ -36,6 +36,11 @@ def normalize_skills(raw_skills: List[str], taxonomy_skills: List[str]) -> List[
     normalized = []
     taxonomy_lower = {skill.lower(): skill for skill in taxonomy_skills}
 
+    def token_overlap(left: str, right: str) -> int:
+        left_tokens = {token for token in left.split() if token}
+        right_tokens = {token for token in right.split() if token}
+        return len(left_tokens & right_tokens)
+
     for skill in raw_skills:
         skill_l = skill.lower().strip()
         if not skill_l:
@@ -66,10 +71,12 @@ def normalize_skills(raw_skills: List[str], taxonomy_skills: List[str]) -> List[
         if matched_any:
             continue
 
-        fuzzy_match = process.extractOne(skill_l, list(taxonomy_lower.keys()), score_cutoff=80)
+        fuzzy_match = process.extractOne(skill_l, list(taxonomy_lower.keys()), score_cutoff=86)
         if fuzzy_match:
-            normalized.append(taxonomy_lower[fuzzy_match[0]])
-            continue
+            candidate = fuzzy_match[0]
+            if " " not in skill_l or " " not in candidate or token_overlap(skill_l, candidate) > 0:
+                normalized.append(taxonomy_lower[candidate])
+                continue
 
         close = get_close_matches(skill_l, list(taxonomy_lower.keys()), n=1, cutoff=0.8)
         if close:

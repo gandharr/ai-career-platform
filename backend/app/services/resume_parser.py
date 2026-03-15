@@ -39,6 +39,9 @@ def _extract_taxonomy_skills(text: str) -> List[str]:
     matched: List[str] = []
 
     for skill in TAXONOMY_SKILLS_SORTED:
+        compact = "".join(ch for ch in skill if ch.isalnum())
+        if len(compact) <= 1:
+            continue
         pattern = rf"(?<![a-z0-9]){re.escape(skill)}(?![a-z0-9])"
         if re.search(pattern, normalized_text):
             matched.append(skill)
@@ -57,7 +60,7 @@ def _extract_freeform_skills(text: str) -> List[str]:
             candidates.extend(re.split(r"[,|•;/]", chunk))
 
     if not candidates:
-        candidates = re.split(r"[,|•;/\n\r\t]", text.lower())
+        return []
 
     cleaned: List[str] = []
     for item in candidates:
