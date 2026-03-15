@@ -136,7 +136,7 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
 }
 
 export function AuthSection({ activeSection, isAuthenticated, authTab, setAuthTab, auth, setAuth, onLogin, onRegister, loading }) {
-  if (!(activeSection === 'auth' || !isAuthenticated)) {
+  if (activeSection !== 'auth') {
     return null
   }
 

@@ -328,9 +328,9 @@ function App() {
   }
 
   const isAuthenticated = Boolean((token || '').trim())
-  const showHeroHeader = isAuthenticated && activeSection === 'dashboard'
+  const showHeroHeader = activeSection === 'dashboard'
   const orderedSectionKeys = ['dashboard', 'input', 'profile', 'recommendations', 'explainability', 'gap', 'learning']
-  const navigableSections = isAuthenticated ? orderedSectionKeys : []
+  const navigableSections = isAuthenticated ? orderedSectionKeys : ['dashboard', 'auth']
   const currentStepIndex = navigableSections.indexOf(activeSection)
   const previousSection = currentStepIndex > 0 ? navigableSections[currentStepIndex - 1] : null
   const nextSection =
@@ -393,7 +393,7 @@ function App() {
             </div>
           ) : null}
 
-          {isAuthenticated ? (
+          {navigableSections.length > 1 ? (
             <div className="flex items-center justify-end gap-3 px-1">
               <button
                 type="button"
