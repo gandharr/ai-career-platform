@@ -79,7 +79,7 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
     return (
       <section className="relative z-20 mb-5">
         <div className="overflow-x-auto">
-          <div className="flex min-w-max items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/85 px-3 py-2">
+          <div className="flex w-full min-w-max items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/85 px-3 py-2">
           <button
             type="button"
             onClick={() => setActiveSection('dashboard')}
@@ -107,7 +107,7 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
             </button>
           ))}
           {overflowItems.length > 0 ? (
-            <div className="ml-1 min-w-[190px]">
+            <div className="ml-auto min-w-[190px]">
               <select
                 className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-300 outline-none transition focus:border-cyan-400/40"
                 value={overflowActiveValue}
