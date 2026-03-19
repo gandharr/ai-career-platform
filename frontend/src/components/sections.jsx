@@ -312,7 +312,7 @@ export function ProfileSection({ isAuthenticated, activeSection, profile }) {
 }
 
 export function RecommendationsSection({ isAuthenticated, activeSection, recommendations, explainability, selectedRole, setSelectedRole, onAnalyzeGap, onExportPdf, loading }) {
-  if (!(isAuthenticated && activeSection === 'recommendations' && recommendations.length > 0)) {
+  if (!(isAuthenticated && activeSection === 'recommendations' && Array.isArray(recommendations) && recommendations.length > 0)) {
     return null
   }
 
@@ -377,7 +377,7 @@ export function RecommendationsSection({ isAuthenticated, activeSection, recomme
 }
 
 export function ExplainabilitySection({ isAuthenticated, activeSection, recommendations, explainability }) {
-  if (!(isAuthenticated && activeSection === 'explainability' && recommendations.length > 0)) {
+  if (!(isAuthenticated && activeSection === 'explainability' && Array.isArray(recommendations) && recommendations.length > 0)) {
     return null
   }
 
@@ -386,6 +386,21 @@ export function ExplainabilitySection({ isAuthenticated, activeSection, recommen
       <div className="grid gap-4 xl:grid-cols-2">
         {recommendations.map((item) => {
           const xai = explainability[item.role] || {}
+          const methodScores = item?.method_scores || {}
+          const cosineScore = Number.isFinite(methodScores.cosine_similarity)
+            ? methodScores.cosine_similarity
+            : Number.isFinite(item?.confidence)
+              ? item.confidence
+              : 0
+          const matchRatioScore = Number.isFinite(methodScores.required_skill_match_ratio)
+            ? methodScores.required_skill_match_ratio
+            : Number.isFinite(item?.matching_score)
+              ? item.matching_score
+              : cosineScore
+          const overallScore = Number.isFinite(item?.confidence)
+            ? item.confidence
+            : Math.max(cosineScore, matchRatioScore)
+
           return (
             <div key={`${item.role}-xai`} className="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
               <div className="mb-5 flex items-center justify-between gap-3">
@@ -422,13 +437,13 @@ export function ExplainabilitySection({ isAuthenticated, activeSection, recommen
 
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <Meter value={item.method_scores?.content ?? 0} label="Content model" />
+                    <Meter value={cosineScore} label="Cosine similarity" />
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <Meter value={item.method_scores?.collaborative ?? 0} label="Collaborative" accentClass="from-fuchsia-400 to-rose-400" />
+                    <Meter value={matchRatioScore} label="Required-skill match" accentClass="from-fuchsia-400 to-rose-400" />
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <Meter value={item.method_scores?.bert ?? 0} label="Semantic model" accentClass="from-emerald-400 to-cyan-400" />
+                    <Meter value={overallScore} label="Final confidence" accentClass="from-emerald-400 to-cyan-400" />
                   </div>
                 </div>
               </div>
@@ -441,7 +456,7 @@ export function ExplainabilitySection({ isAuthenticated, activeSection, recommen
 }
 
 export function GapSection({ isAuthenticated, activeSection, gapReport }) {
-  if (!(isAuthenticated && activeSection === 'gap' && gapReport.length > 0)) {
+  if (!(isAuthenticated && activeSection === 'gap' && Array.isArray(gapReport) && gapReport.length > 0)) {
     return null
   }
 
@@ -459,7 +474,7 @@ export function GapSection({ isAuthenticated, activeSection, gapReport }) {
 }
 
 export function SkillRadarSection({ isAuthenticated, activeSection, gapReport, chartData }) {
-  if (!(isAuthenticated && activeSection === 'radar' && gapReport.length > 0)) {
+  if (!(isAuthenticated && activeSection === 'radar' && Array.isArray(gapReport) && gapReport.length > 0)) {
     return null
   }
 
@@ -475,7 +490,7 @@ export function SkillRadarSection({ isAuthenticated, activeSection, gapReport, c
 }
 
 export function LearningSection({ isAuthenticated, activeSection, resources }) {
-  if (!(isAuthenticated && activeSection === 'learning' && resources.length > 0)) {
+  if (!(isAuthenticated && activeSection === 'learning' && Array.isArray(resources) && resources.length > 0)) {
     return null
   }
 

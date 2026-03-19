@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   warmUpBackend,
+  pingBackendHealth,
   getLearningPath,
   getSkillGap,
   loginUser,
@@ -43,6 +44,7 @@ function App() {
   const [inputTab, setInputTab] = useState('upload')
   const [activeSection, setActiveSection] = useState(token ? 'input' : 'dashboard')
   const flashTimeoutRef = useRef(0)
+  const backendWarmupPromiseRef = useRef(null)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'light')
@@ -73,25 +75,65 @@ function App() {
       return true
     }
 
-    setBackendWarming(true)
-    const ok = await warmUpBackend()
-    setBackendWarming(false)
-    setBackendReady(ok)
-
-    if (!ok) {
-      setError('Backend is waking up. Please wait a few seconds and try again.')
-      return false
+    if (backendWarmupPromiseRef.current) {
+      return backendWarmupPromiseRef.current
     }
-    return true
+
+    backendWarmupPromiseRef.current = (async () => {
+      setBackendWarming(true)
+      const ok = await warmUpBackend()
+      setBackendReady(ok)
+      setBackendWarming(false)
+
+      if (ok) {
+        if (error.includes('Backend')) {
+          setError('')
+        }
+      } else {
+        setError('Backend is still starting. Retrying automatically...')
+      }
+
+      return ok
+    })()
+
+    const result = await backendWarmupPromiseRef.current
+    backendWarmupPromiseRef.current = null
+    return result
   }
 
   useEffect(() => {
-    void ensureBackendReady()
+    let cancelled = false
+
+    const tryWarmup = async () => {
+      const ok = await ensureBackendReady()
+      if (!ok && !cancelled) {
+        window.setTimeout(() => {
+          if (!cancelled) {
+            void tryWarmup()
+          }
+        }, 6000)
+      }
+    }
+
+    void tryWarmup()
+
+    const keepAliveTimerId = window.setInterval(async () => {
+      const ok = await pingBackendHealth()
+      if (!ok && !cancelled) {
+        setBackendReady(false)
+        void ensureBackendReady()
+      }
+    }, 4 * 60 * 1000)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(keepAliveTimerId)
+    }
   }, [])
 
   const chartData = useMemo(
     () =>
-      [...gapReport]
+      [...(Array.isArray(gapReport) ? gapReport : [])]
         .sort((left, right) => (right.importance || 0) - (left.importance || 0))
         .slice(0, 8)
         .map((item) => ({
@@ -345,12 +387,13 @@ function App() {
       }
 
       const gap = await getSkillGap({ user_skills: profile.skills, target_role: selectedRole })
-      setGapReport(gap.missing_skills)
+      const normalizedGap = Array.isArray(gap?.missing_skills) ? gap.missing_skills : []
+      setGapReport(normalizedGap)
 
       const learn = await getLearningPath({
-        missing_skills: gap.missing_skills.map((item) => item.skill),
+        missing_skills: normalizedGap.map((item) => item.skill),
       })
-      setResources(learn.resources)
+      setResources(Array.isArray(learn?.resources) ? learn.resources : [])
       setActiveSection('gap')
       showMessage(`Skill gap ready for ${selectedRole}.`)
     } catch (requestError) {

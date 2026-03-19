@@ -89,6 +89,11 @@ flowchart LR
 | Auth | JWT Bearer |
 | Deployment | GitHub Pages + Render |
 
+## Deployment Availability
+- Render `free` web services sleep after inactivity and can show a backend wake-up delay.
+- For always-available backend access (phone/laptop without retry), deploy backend on Render `starter` (or higher).
+- This repo's `render.yaml` is configured for an always-on `starter` backend plan.
+
 ## Project Structure
 - `frontend/` → dashboard UI, auth, charts, PDF export
 - `backend/app/main.py` → API routes/orchestration

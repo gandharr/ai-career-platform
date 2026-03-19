@@ -52,7 +52,7 @@ const isTransientNetworkError = (error) => {
   return [408, 429, 500, 502, 503, 504].includes(status)
 }
 
-const requestWithRetry = async (requestFn, retries = 1) => {
+const requestWithRetry = async (requestFn, retries = 1, delayMs = 350) => {
   let lastError
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
@@ -63,7 +63,27 @@ const requestWithRetry = async (requestFn, retries = 1) => {
       if (attempt === retries || !isTransientNetworkError(error)) {
         break
       }
-      await sleep(350 * (attempt + 1))
+      await sleep(delayMs * (attempt + 1))
+    }
+  }
+
+  throw lastError
+}
+
+const requestWithBackoff = async (requestFn, maxAttempts = 8, baseDelayMs = 1200) => {
+  let lastError
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await requestFn()
+    } catch (error) {
+      lastError = error
+      if (attempt === maxAttempts || !isTransientNetworkError(error)) {
+        break
+      }
+
+      const delay = Math.min(baseDelayMs * 2 ** (attempt - 1), 10000)
+      await sleep(delay)
     }
   }
 
@@ -123,7 +143,16 @@ export const getUserProfile = async () => {
 
 export const warmUpBackend = async () => {
   try {
-    await requestWithRetry(() => api.get('/health', { timeout: 12000 }), 1)
+    await requestWithBackoff(() => api.get('/health', { timeout: 15000 }), 8, 1000)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export const pingBackendHealth = async () => {
+  try {
+    await api.get('/health', { timeout: 8000 })
     return true
   } catch {
     return false
