@@ -47,9 +47,9 @@ function App() {
   const backendWarmupPromiseRef = useRef(null)
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'light')
-    document.body.classList.add('theme-light')
-    localStorage.setItem('career_theme', 'light')
+    document.documentElement.setAttribute('data-theme', 'dark')
+    document.body.classList.remove('theme-light')
+    localStorage.setItem('career_theme', 'dark')
   }, [])
 
   useEffect(() => {
@@ -523,7 +523,7 @@ function App() {
             <div className="flex items-center justify-end gap-3 px-1">
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-300 bg-white text-lg text-emerald-800 shadow-sm shadow-emerald-100 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-600 bg-slate-900 text-lg text-slate-100 shadow-sm shadow-black/20 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:border-sky-400/40 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => previousSection && setActiveSection(previousSection)}
                 disabled={!previousSection || loading || backendWarming}
                 aria-label="Previous step"
@@ -533,7 +533,7 @@ function App() {
               </button>
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-500/50 bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-lg text-white shadow-lg shadow-emerald-300/35 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:from-emerald-500 hover:via-green-500 hover:to-emerald-700 hover:shadow-xl hover:shadow-emerald-400/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-sky-500/40 bg-gradient-to-br from-slate-500 via-sky-500 to-blue-500 text-lg text-white shadow-lg shadow-slate-900/30 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105 hover:from-slate-400 hover:via-sky-500 hover:to-blue-600 hover:shadow-xl hover:shadow-blue-900/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 onClick={() => void onNextStep()}
                 disabled={!nextSection || loading || backendWarming}
                 aria-label="Next step"

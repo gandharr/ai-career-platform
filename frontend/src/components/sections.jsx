@@ -6,19 +6,19 @@ const GapRadarChart = lazy(() => import('./GapRadarChart'))
 export function HeroHeader({ isAuthenticated, onLogout, onOpenLogin, onOpenRegister }) {
   return (
     <header className="panel overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(74,222,128,0.14),transparent_24%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.14),transparent_28%),radial-gradient(circle_at_top_right,rgba(71,85,105,0.16),transparent_24%)]" />
       <div className="relative border-b border-white/10 px-6 py-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <LogoMark className="h-14 w-14 rounded-2xl shadow-lg shadow-cyan-500/10" />
+            <LogoMark className="h-14 w-14 rounded-2xl shadow-lg shadow-blue-500/10" />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">CareerAI</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200">CareerAI</p>
               <h1 className="text-xl font-bold tracking-tight text-slate-50 sm:text-2xl">AI-Powered Career Intelligence Platform</h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <span className={`status-pill ${isAuthenticated ? 'status-live' : 'status-idle'}`}>
-              <span className={`h-2.5 w-2.5 rounded-full ${isAuthenticated ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+              <span className={`h-2.5 w-2.5 rounded-full ${isAuthenticated ? 'bg-sky-400' : 'bg-slate-500'}`} />
               {isAuthenticated ? 'Signed in' : 'Login required'}
             </span>
             {isAuthenticated ? (
@@ -94,7 +94,7 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
             onClick={() => setActiveSection('dashboard')}
             className={`rounded-lg px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] transition ${
               activeSection === 'dashboard'
-                ? 'bg-cyan-400/15 text-cyan-200'
+                ? 'bg-sky-400/15 text-sky-200'
                 : 'text-slate-300 hover:bg-white/5 hover:text-slate-100'
             }`}
           >
@@ -108,7 +108,7 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
               disabled={!item.enabled}
               className={`rounded-lg px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] transition ${
                 activeSection === item.key
-                  ? 'bg-cyan-400/15 text-cyan-200'
+                  ? 'bg-sky-400/15 text-sky-200'
                   : 'text-slate-300 hover:bg-white/5 hover:text-slate-100'
               } ${!item.enabled ? 'cursor-not-allowed opacity-40' : ''}`}
             >
@@ -118,7 +118,7 @@ export function DashboardSectionNav({ isAuthenticated, activeSection, setActiveS
           {overflowItems.length > 0 ? (
             <div className="ml-auto min-w-[190px]">
               <select
-                className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-300 outline-none transition focus:border-cyan-400/40"
+                className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-slate-300 outline-none transition focus:border-sky-400/40"
                 value={overflowActiveValue}
                 onChange={(event) => setActiveSection(event.target.value)}
               >
@@ -260,7 +260,7 @@ export function InputSection({ isAuthenticated, activeSection, inputTab, setInpu
               <div className="space-y-1 text-center">
                 <p className="text-lg font-semibold text-slate-50">Drop your resume here or browse</p>
                 <p className="text-sm text-slate-400">Only resume/CV files are accepted (.pdf, .docx, .txt)</p>
-                {resumeFile ? <p className="text-sm font-semibold text-cyan-200">Selected file: {resumeFile.name}</p> : null}
+                {resumeFile ? <p className="text-sm font-semibold text-sky-200">Selected file: {resumeFile.name}</p> : null}
               </div>
               <input
                 type="file"
@@ -289,7 +289,7 @@ export function ProfileSection({ isAuthenticated, activeSection, profile }) {
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-cyan-400 to-sky-500 text-2xl font-bold text-slate-950">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-slate-400 to-blue-500 text-2xl font-bold text-slate-950">
               {(profile.name || 'U').charAt(0).toUpperCase()}
             </div>
             <div>
@@ -346,8 +346,8 @@ export function RecommendationsSection({ isAuthenticated, activeSection, recomme
                 onClick={() => setSelectedRole(item.role)}
                 className={`rounded-3xl border p-5 text-left transition ${
                   active
-                    ? 'border-cyan-400/40 bg-cyan-400/10 shadow-lg shadow-cyan-500/10'
-                    : 'border-white/10 bg-slate-950/60 hover:border-cyan-400/20 hover:bg-slate-900/70'
+                    ? 'border-sky-400/40 bg-sky-400/10 shadow-lg shadow-blue-500/10'
+                    : 'border-white/10 bg-slate-950/60 hover:border-sky-400/20 hover:bg-slate-900/70'
                 }`}
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
@@ -405,7 +405,7 @@ export function ExplainabilitySection({ isAuthenticated, activeSection, recommen
             <div key={`${item.role}-xai`} className="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <h3 className="text-lg font-semibold text-slate-50">{item.role}</h3>
-                <span className="text-sm font-semibold tabular-nums text-cyan-200">{formatPercentValue(item.confidence)}</span>
+                <span className="text-sm font-semibold tabular-nums text-sky-200">{formatPercentValue(item.confidence)}</span>
               </div>
 
               <div className="space-y-5">
@@ -440,10 +440,10 @@ export function ExplainabilitySection({ isAuthenticated, activeSection, recommen
                     <Meter value={cosineScore} label="Cosine similarity" />
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <Meter value={matchRatioScore} label="Required-skill match" accentClass="from-fuchsia-400 to-rose-400" />
+                    <Meter value={matchRatioScore} label="Required-skill match" accentClass="from-slate-400 to-blue-500" />
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <Meter value={overallScore} label="Final confidence" accentClass="from-emerald-400 to-cyan-400" />
+                    <Meter value={overallScore} label="Final confidence" accentClass="from-blue-400 to-sky-400" />
                   </div>
                 </div>
               </div>
@@ -465,7 +465,7 @@ export function GapSection({ isAuthenticated, activeSection, gapReport }) {
       <div className="space-y-4">
         {gapReport.map((item) => (
           <div key={item.skill} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-            <Meter value={item.importance} label={item.skill} accentClass="from-rose-400 to-amber-400" />
+            <Meter value={item.importance} label={item.skill} accentClass="from-slate-500 to-blue-500" />
           </div>
         ))}
       </div>
@@ -503,7 +503,7 @@ export function LearningSection({ isAuthenticated, activeSection, resources }) {
             href={item.url}
             target="_blank"
             rel="noreferrer"
-            className="rounded-3xl border border-white/10 bg-slate-950/60 p-5 transition hover:border-cyan-400/25 hover:bg-slate-900/70"
+            className="rounded-3xl border border-white/10 bg-slate-950/60 p-5 transition hover:border-sky-400/25 hover:bg-slate-900/70"
           >
             <div className="mb-4 flex items-center justify-between gap-3">
               <ProviderBadge provider={item.provider} />
@@ -529,7 +529,7 @@ export function HistorySection({ isAuthenticated, activeSection, profileHistory 
         {profileHistory.map((item, index) => (
           <div key={`${item.role}-${index}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-400/10 font-semibold text-cyan-200 ring-1 ring-cyan-400/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-400/10 font-semibold text-sky-200 ring-1 ring-sky-400/20">
                 {index + 1}
               </div>
               <div>

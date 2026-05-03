@@ -15,7 +15,7 @@ export function LogoMark({ className = 'h-12 w-12' }) {
 
 export function Tabs({ items, active, onChange }) {
   return (
-    <div className="inline-flex rounded-2xl border border-emerald-200 bg-emerald-50 p-1 shadow-sm shadow-emerald-100">
+    <div className="inline-flex rounded-2xl border border-slate-700 bg-slate-900 p-1 shadow-sm shadow-black/20">
       {items.map((item) => (
         <button
           key={item.key}
@@ -23,8 +23,8 @@ export function Tabs({ items, active, onChange }) {
           onClick={() => onChange(item.key)}
           className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
             active === item.key
-              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-300/60'
-              : 'text-slate-700 hover:bg-emerald-100 hover:text-emerald-800'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-900/40'
+              : 'text-slate-300 hover:bg-slate-800 hover:text-slate-100'
           }`}
         >
           {item.label}
@@ -39,15 +39,15 @@ export function SectionFrame({ step, title, hint, children }) {
     <section className="panel">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-6 py-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-sm font-bold text-emerald-700 ring-1 ring-emerald-300/70">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500/10 text-sm font-bold text-sky-200 ring-1 ring-sky-400/20">
             {step}
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Step {step}</p>
-            <h2 className="text-xl font-semibold text-slate-800">{title}</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Step {step}</p>
+            <h2 className="text-xl font-semibold text-slate-50">{title}</h2>
           </div>
         </div>
-        {hint ? <p className="text-sm text-slate-600">{hint}</p> : null}
+        {hint ? <p className="text-sm text-slate-400">{hint}</p> : null}
       </div>
       <div className="px-6 py-6">{children}</div>
     </section>
@@ -56,9 +56,9 @@ export function SectionFrame({ step, title, hint, children }) {
 
 export function SkillChip({ children, tone = 'default' }) {
   const toneClass = {
-    default: 'border-emerald-300 bg-emerald-50 text-emerald-800',
-    success: 'border-emerald-300 bg-emerald-100 text-emerald-800',
-    danger: 'border-rose-300 bg-rose-50 text-rose-700',
+    default: 'border-slate-600 bg-slate-900 text-slate-200',
+    success: 'border-sky-400/30 bg-sky-400/10 text-sky-200',
+    danger: 'border-slate-500 bg-slate-800 text-slate-200',
   }
 
   return <span className={`chip ${toneClass[tone]}`}>{children}</span>
@@ -66,15 +66,15 @@ export function SkillChip({ children, tone = 'default' }) {
 
 export function ProviderBadge({ provider }) {
   const map = {
-    YouTube: 'border-rose-300 bg-rose-50 text-rose-700',
-    Coursera: 'border-emerald-300 bg-emerald-50 text-emerald-800',
-    Udemy: 'border-amber-300 bg-amber-50 text-amber-700',
+    YouTube: 'border-sky-400/30 bg-sky-400/10 text-sky-200',
+    Coursera: 'border-slate-500 bg-slate-800 text-slate-200',
+    Udemy: 'border-blue-400/30 bg-blue-400/10 text-blue-200',
   }
 
-  return <span className={`chip ${map[provider] || 'border-slate-300 bg-white text-slate-700'}`}>{provider}</span>
+  return <span className={`chip ${map[provider] || 'border-slate-600 bg-slate-900 text-slate-200'}`}>{provider}</span>
 }
 
-export function Meter({ value, label, accentClass = 'from-cyan-400 to-sky-400' }) {
+export function Meter({ value, label, accentClass = 'from-slate-400 to-blue-500' }) {
   const widthValue = Number.isFinite(value) ? Math.max(0, Math.min(100, value * 100)) : 0
   const width = `${widthValue}%`
   const displayValue = formatPercentValue(value)
@@ -82,10 +82,10 @@ export function Meter({ value, label, accentClass = 'from-cyan-400 to-sky-400' }
   return (
     <div className="space-y-2">
       <div className="flex items-start justify-between gap-2 text-sm">
-        <span className="min-w-0 break-words leading-tight text-slate-700">{label}</span>
-        <span className="shrink-0 whitespace-nowrap text-right font-semibold tabular-nums text-slate-800">{displayValue}</span>
+        <span className="min-w-0 break-words leading-tight text-slate-300">{label}</span>
+        <span className="shrink-0 whitespace-nowrap text-right font-semibold tabular-nums text-slate-100">{displayValue}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-emerald-100">
+      <div className="h-2 overflow-hidden rounded-full bg-slate-800">
         <div className={`h-full rounded-full bg-gradient-to-r ${accentClass}`} style={{ width }} />
       </div>
     </div>
