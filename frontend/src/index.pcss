@@ -26,9 +26,9 @@
     font-size: 15px;
     line-height: 1.55;
     background:
-      radial-gradient(circle at top left, rgba(6, 18, 40, 0.24), transparent 28%),
-      radial-gradient(circle at top right, rgba(4, 12, 30, 0.16), transparent 24%),
-      linear-gradient(180deg, #020617 0%, #071428 45%, #0b1220 100%);
+      radial-gradient(circle at top left, rgba(71, 85, 105, 0.26), transparent 28%),
+      radial-gradient(circle at top right, rgba(37, 99, 235, 0.14), transparent 24%),
+      linear-gradient(180deg, #0f172a 0%, #111827 48%, #1f2937 100%);
     min-height: 100vh;
   }
 
@@ -49,13 +49,13 @@
   }
 
   ::selection {
-    background: rgba(96, 165, 250, 0.18);
-    color: #c7eaff;
+    background: rgba(96, 165, 250, 0.22);
+    color: #eff6ff;
   }
 
   body.theme-light ::selection {
-    background: rgba(96, 165, 250, 0.18);
-    color: #c7eaff;
+    background: rgba(96, 165, 250, 0.22);
+    color: #eff6ff;
   }
 }
 
@@ -185,7 +185,7 @@ body.theme-light .border-white\/20 {
   }
 
   .btn-accent {
-    @apply bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500;
+    @apply bg-slate-600 text-white hover:bg-slate-700 focus:ring-slate-500;
   }
 
   .btn-ghost {
@@ -205,7 +205,7 @@ body.theme-light .border-white\/20 {
   }
 
   .upload-area {
-    @apply flex cursor-pointer flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-white/10 bg-slate-950/60 px-6 py-10 transition hover:border-blue-500/30 hover:bg-slate-900/75;
+    @apply flex cursor-pointer flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-white/10 bg-slate-950/60 px-6 py-10 transition hover:border-slate-400/30 hover:bg-slate-900/75;
   }
 
   .status-pill {
@@ -225,7 +225,7 @@ body.theme-light .border-white\/20 {
   }
 
   .tag-pill {
-    @apply inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-indigo-400/20 bg-indigo-400/10 px-3 py-1 text-xs font-semibold leading-none text-indigo-200;
+    @apply inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold leading-none text-sky-200;
   }
 
   .mini-stat {
@@ -253,7 +253,7 @@ body.theme-light .border-white\/20 {
   }
 
   .notice.success {
-    @apply border-blue-500/20 bg-blue-500/8 text-blue-200;
+    @apply border-sky-500/20 bg-sky-500/10 text-sky-200;
   }
 
   .notice.error {
@@ -275,14 +275,14 @@ body.theme-light .border-white\/20 {
   right: 0;
   height: 3px;
   z-index: 9999;
-  background: rgba(30, 58, 138, 0.08);
+  background: rgba(51, 65, 85, 0.14);
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
   width: 45%;
-  background: linear-gradient(90deg, transparent, #0ea5ff, #60a5fa, #0ea5ff, transparent);
+  background: linear-gradient(90deg, transparent, #64748b, #60a5fa, #64748b, transparent);
   background-size: 300% 100%;
   animation: pb-sweep 1.5s ease-in-out infinite;
   border-radius: 0 4px 4px 0;
@@ -320,9 +320,9 @@ body.theme-light .border-white\/20 {
 }
 
   .toast-success {
-    border-color: rgba(96,165,250,0.12);
-    background: rgba(4, 12, 28, 0.9);
-    color: #c7eaff;
+    border-color: rgba(96, 165, 250, 0.16);
+    background: rgba(15, 23, 42, 0.94);
+    color: #dbeafe;
   }
 
 .toast-error {
