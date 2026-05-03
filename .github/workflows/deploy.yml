@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: development
+      NPM_CONFIG_PRODUCTION: "false"
     steps:
       - uses: actions/checkout@v4
 
@@ -52,7 +53,12 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           # Automatically sets the correct sub-path for GitHub Pages
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
-        run: npm run build
+        run: |
+          if ! npx --no-install vite --version >/dev/null 2>&1; then
+            echo "vite not found after install; reinstalling with dev dependencies"
+            npm install --include=dev
+          fi
+          npm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
