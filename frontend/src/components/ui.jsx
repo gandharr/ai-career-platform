@@ -7,7 +7,7 @@ export function formatPercentValue(value) {
   return `${percentFormatter.format(normalized)}%`
 }
 
-export function LogoMark({ className = 'h-12 w-12' }) {
+export function LogoMark({ className = 'h-12 w-auto' }) {
   const baseUrl = import.meta.env.BASE_URL || '/'
   const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
   return <img src={`${normalizedBaseUrl}logo.svg`} alt="CareerAI logo" className={className} />
